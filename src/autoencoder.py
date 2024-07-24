@@ -28,13 +28,13 @@ class Autoencoder(nn.Module):
             nn.Tanh()
         )
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> (Tensor, Tensor):
         """
         Forward pass of the autoencoder model.
 
         :param x: input tensor of shape (batch_size, 28 * 28)
-        :return: Recovered tensor.
+        :return: Recovered tensor, code tensor
         """
         code = self.encoder(x)
         recovered = self.decoder(code)
-        return recovered
+        return recovered, code
