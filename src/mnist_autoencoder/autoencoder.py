@@ -27,6 +27,7 @@ class Autoencoder(nn.Module):
             nn.Linear(128, 28 * 28),
             nn.Tanh()
         )
+        print(self)
 
     def forward(self, x: Tensor) -> (Tensor, Tensor):
         """
