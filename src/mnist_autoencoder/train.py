@@ -1,70 +1,23 @@
 # Train an autoencoder on the MNIST dataset.
 
-import random
 import time
 
 import matplotlib.pyplot as plt
-import numpy as np
 import torch
 import torch.optim as optim
-import torchvision
-import torchvision.transforms as transforms
 from torch import Tensor
 from torch import nn
 from torch.utils.data import DataLoader
-from torchvision.datasets import MNIST
 
 from src.mnist_autoencoder.autoencoder import Autoencoder
-
-print(torch.__version__)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
-
-
-# Set seeds for reproducibility
-def set_seeds(seed: int = 42):
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
-
-    np.random.seed(seed)
-    random.seed(seed)
-
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-
-
-def get_mnist_data(data_dir: str, batch_size: int) -> (DataLoader, DataLoader):
-    '''
-    Get MNIST Training and Testing data sets.
-    :param data_dir: Directory where downloaded data is stored.
-    :param batch_size: Batch size for training and testing data.
-    :return: (train_loader, test_loader)
-    '''
-
-    # transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
-
-    # Transform to normalize pixel values and flatten images to 1D tensor.
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,)),
-        torch.flatten,
-    ])
-
-    trainset = MNIST(root=data_dir, train=True, download=True, transform=transform)
-    print(f"Number of training examples: {len(trainset)}")
-    trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
-
-    testset = torchvision.datasets.MNIST(root='./data', train=False, download=True, transform=transform)
-    print(f"Number of testing examples: {len(testset)}")
-    testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False)
-
-    return trainloader, testloader
+from src.mnist_autoencoder.load import get_mnist_data
+from src.utils.cuda import print_cuda_configuration
+from src.utils.seeds import set_seeds
 
 
 def testing_loss(autoencoder: Autoencoder, test_loader: DataLoader, mse: nn.MSELoss) -> float:
     '''
-    Compute the testing loss.
+    Compute the average testing loss.
     :param autoencoder: Autoencoder model.
     :param test_loader: DataLoader for testing data.
     :param mse: Mean Squared Error loss function.
@@ -72,6 +25,7 @@ def testing_loss(autoencoder: Autoencoder, test_loader: DataLoader, mse: nn.MSEL
     '''
     test_loss = 0.0
 
+    num_test_examples = len(test_loader)
     autoencoder.eval()  # Set model to evaluation mode.
     with torch.no_grad():  # Disable gradient calculation.
         for img_batch, _labels in test_loader:
@@ -83,7 +37,7 @@ def testing_loss(autoencoder: Autoencoder, test_loader: DataLoader, mse: nn.MSEL
             loss = mse(output, img_batch)
             test_loss += loss.item()
 
-    return test_loss
+    return test_loss / num_test_examples
 
 
 def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display: int = 10):
@@ -102,57 +56,64 @@ def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display
             ax.get_yaxis().set_visible(False)
 
 
-# Set seeds for reproducibility
-set_seeds()
+def main():
+    print_cuda_configuration()
 
-train_loader, test_loader = get_mnist_data('./data', batch_size=100)
+    # Set seeds for reproducibility
+    set_seeds()
 
-autoencoder: Autoencoder = Autoencoder().cuda()
+    train_loader, test_loader = get_mnist_data('./data', batch_size=100)
 
-# Loss function
-mse: nn.MSELoss = nn.MSELoss()
+    autoencoder: Autoencoder = Autoencoder().cuda()
 
-optimizer = optim.Adam(autoencoder.parameters(), lr=1e-3)
+    # Loss function
+    mse: nn.MSELoss = nn.MSELoss()
 
-lambda_l2 = 1e-5  # Regularization strength
+    optimizer = optim.Adam(autoencoder.parameters(), lr=1e-3)
 
-# Training
-num_epochs = 10
-for epoch in range(num_epochs):
-    start_time = time.time()  # Start time for the epoch
-    for img_batch, _labels in train_loader:
-        img_batch = img_batch.cuda()  # Move batch to GPU
+    lambda_l2 = 1e-5  # Regularization strength
 
-        # Forward pass
-        output, code = autoencoder(img_batch)
-        loss = mse(output, img_batch)
+    # Training
+    num_epochs = 10
+    for epoch in range(num_epochs):
+        start_time = time.time()  # Start time for the epoch
+        for img_batch, _labels in train_loader:
+            img_batch = img_batch.cuda()  # Move batch to GPU
 
-        # L2 regularization on the code vector
-        l2_reg = lambda_l2 * torch.norm(code, p=2)
-        loss += l2_reg
+            # Forward pass
+            output, code = autoencoder(img_batch)
+            loss = mse(output, img_batch)
 
-        # Backward pass and optimization
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+            # L2 regularization on the code vector
+            l2_reg = lambda_l2 * torch.norm(code, p=2)
+            loss += l2_reg
 
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-    print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}, Time: {elapsed_time:.2f} seconds')
+            # Backward pass and optimization
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-# Testing loss
-test_loss = testing_loss(autoencoder, test_loader, mse)
-print(f'Testing loss: {test_loss:.4f}')
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}, Time: {elapsed_time:.2f} seconds')
 
-test_data_iter = iter(test_loader)
-test_images, _labels = next(test_data_iter)
-test_images = test_images.cuda()
+    # Testing loss
+    avg_test_loss = testing_loss(autoencoder, test_loader, mse)
+    print(f'Average Testing Loss: {avg_test_loss:.4f}')
 
-(reconstructed, _code) = autoencoder.forward(test_images)
+    test_data_iter = iter(test_loader)
+    test_images, _labels = next(test_data_iter)
+    test_images = test_images.cuda()
 
-test_images = test_images.cpu()
-reconstructed = reconstructed.cpu()
+    (reconstructed, _code) = autoencoder.forward(test_images)
 
-# Visualization
-display_reconstructions(test_images, reconstructed)
-plt.show()  # Display all open figures
+    test_images = test_images.cpu()
+    reconstructed = reconstructed.cpu()
+
+    # Visualization
+    display_reconstructions(test_images, reconstructed)
+    plt.show()  # Display all open figures
+
+
+if __name__ == '__main__':
+    main()
