@@ -1,5 +1,7 @@
 # Train an autoencoder on the MNIST dataset.
 
+import time
+
 import matplotlib.pyplot as plt
 import torch
 import torch.optim as optim
@@ -65,20 +67,20 @@ optimizer = optim.Adam(autoencoder.parameters(), lr=1e-3)
 # Training
 num_epochs = 2
 for epoch in range(num_epochs):
+    start_time = time.time()  # Start time for the epoch
     for img_batch, _labels in train_loader:
         img_batch = img_batch.view(img_batch.size(0), 28 * 28)  # Flatten images to 2D tensor (batch_size, 768)
-
         img_batch = img_batch.cuda()  # Move to GPU
-        # autoencoder.cuda() # Move to GPU
 
         output = autoencoder(img_batch)
         loss = criterion(output, img_batch)
-
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-    print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}')
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}, Time: {elapsed_time:.2f} seconds')
 
 test_data_iter = iter(test_loader)
 test_images, _labels = next(test_data_iter)
@@ -90,7 +92,7 @@ reconstructed = autoencoder.forward(test_images)
 test_images = test_images.cpu()
 reconstructed = reconstructed.cpu()
 
-# Visualizatio
+# Visualization
 
 display_reconstructions(test_images, reconstructed)
-plt.show()
+plt.show()  # Display all open figures
