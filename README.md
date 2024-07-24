@@ -2,6 +2,10 @@
 
 A collection of neural network examples using PyTorch.
 
+## Examples
+
+1. [MNIST Autoencoder](src/mnist_autoencoder): A simple autoencoder network for the MNIST dataset.
+
 ## Setup Instructions
 
 ### Prerequisites
@@ -53,7 +57,7 @@ poetry install
 To train the MNIST autoencoder, run the following command:
 
 ```bash
-poetry run python src/mnist_autoencoder/train.py
+poetry run python -m src.mnist_autoencoder.train
 ```
 
 ## Contributing
