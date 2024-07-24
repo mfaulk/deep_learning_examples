@@ -105,7 +105,7 @@ def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display
 # Set seeds for reproducibility
 set_seeds()
 
-train_loader, test_loader = get_mnist_data('./data', batch_size=1000)
+train_loader, test_loader = get_mnist_data('./data', batch_size=100)
 
 autoencoder: Autoencoder = Autoencoder().cuda()
 
