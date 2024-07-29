@@ -4,30 +4,35 @@ import torch.nn as nn
 from torch import Tensor
 
 
-# Autoencoder model
+# Autoencoder model. 784 -> 128 -> 64 -> [12] -> 64 -> 128 -> 784
 class Autoencoder(nn.Module):
     def __init__(self):
         super(Autoencoder, self).__init__()
         self.encoder = nn.Sequential(
+            # Layer 1: 784 -> 128
             nn.Linear(28 * 28, 128),
             nn.ReLU(True),
+
+            # Layer 2: 128 -> 64
             nn.Linear(128, 64),
             nn.ReLU(True),
+
+            # Layer 3: 64 -> 12
             nn.Linear(64, 12),
-            # nn.ReLU(True),
-            # nn.Linear(12, 3)
         )
         self.decoder = nn.Sequential(
-            # nn.Linear(3, 12),
-            # nn.ReLU(True),
+            # Layer 4: 12 -> 64
             nn.Linear(12, 64),
             nn.ReLU(True),
+
+            # Layer 5: 64 -> 128
             nn.Linear(64, 128),
             nn.ReLU(True),
+
+            # Layer 6: 128 -> 784
             nn.Linear(128, 28 * 28),
             nn.Tanh()
         )
-        print(self)
 
     def forward(self, x: Tensor) -> (Tensor, Tensor):
         """
