@@ -5,12 +5,12 @@ from torchvision.datasets import ImageFolder
 
 
 def load_celeba(path: str, batch_size: int) -> (DataLoader, DataLoader):
-    '''
+    """
     Get CelebA Training and Testing data sets. Each image has size 218 x 178 x 3.
     :param path: Path to a directory of images.
     :param batch_size: Batch size for training.
     :return: (train_loader, test_loader)
-    '''
+    """
 
     transform = transforms.Compose([
         transforms.ToTensor(),
@@ -32,8 +32,8 @@ def load_celeba(path: str, batch_size: int) -> (DataLoader, DataLoader):
     train_dataset, test_dataset = random_split(full_dataset, [train_size, test_size])
 
     # Define the DataLoader
-    training_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    testing_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    training_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=6)
+    testing_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=6)
 
     # #
     # transform = transforms.Compose([

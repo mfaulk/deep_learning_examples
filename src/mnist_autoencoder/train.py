@@ -17,13 +17,13 @@ from src.utils.seeds import set_seeds
 
 
 def testing_loss(autoencoder: Autoencoder, test_loader: DataLoader, mse: nn.MSELoss) -> float:
-    '''
+    """
     Compute the average testing loss.
     :param autoencoder: Autoencoder model.
     :param test_loader: DataLoader for testing data.
     :param mse: Mean Squared Error loss function.
     :return: Testing loss.
-    '''
+    """
     test_loss = 0.0
 
     num_test_examples = len(test_loader)
@@ -42,13 +42,13 @@ def testing_loss(autoencoder: Autoencoder, test_loader: DataLoader, mse: nn.MSEL
 
 
 def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display: int = 10):
-    '''
+    """
     Display the original and reconstructed images.
     :param original: Original images.
     :param reconstructed: Reconstructed images.
     :param num_display: Number of original-reconstructed image pairs to display.
     :return:
-    '''
+    """
     fig, axes = plt.subplots(nrows=2, ncols=num_display, sharex=True, sharey=True, figsize=(20, 4))
     for images, row in zip([original, reconstructed], axes):
         for img, ax in zip(images, row):
