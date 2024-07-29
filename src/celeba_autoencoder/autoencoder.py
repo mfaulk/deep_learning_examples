@@ -4,18 +4,21 @@ import torch.nn as nn
 from torch import Tensor
 
 
-# Autoencoder model. 4096 * 3-> [32] -> 4096 * 3
+# Autoencoder model.
+#
+# CelebA images are 218 x 178 x 3 = 116_412 pixels
+# 116_412 -> [32] -> 116_412
 class Autoencoder(nn.Module):
     def __init__(self):
         super(Autoencoder, self).__init__()
         self.encoder = nn.Sequential(
-            # Layer 1: 4096 -> 32
-            nn.Linear(64 * 64 * 3, 32),
+            # Layer 1: 116_412 -> 32
+            nn.Linear(218 * 178 * 3, 32),
             nn.ReLU(True),
         )
         self.decoder = nn.Sequential(
-            # Layer 2: 32 -> 4096
-            nn.Linear(32, 64 * 64 * 3),
+            # Layer 2: 32 -> 116_412
+            nn.Linear(32, 218 * 178 * 3),
             nn.Tanh()
         )
 
