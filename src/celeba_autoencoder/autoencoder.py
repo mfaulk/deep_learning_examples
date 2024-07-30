@@ -12,12 +12,15 @@ class Autoencoder(nn.Module):
     def __init__(self):
         super(Autoencoder, self).__init__()
         self.encoder = nn.Sequential(
-            # Layer 1: 116_412 -> 320
-            nn.Linear(218 * 178 * 3, 320),
+            # Layer 1: 116_412 -> 500
+            nn.Linear(218 * 178 * 3, 500),
             nn.ReLU(True),
+            # Layer 2: 500 -> 320
+            nn.Linear(500, 320),
+            nn.ReLU(True)
         )
         self.decoder = nn.Sequential(
-            # Layer 2: 320 -> 116_412
+            # Layer 1: 320 -> 116_412
             nn.Linear(320, 218 * 178 * 3),
             nn.Tanh()
         )

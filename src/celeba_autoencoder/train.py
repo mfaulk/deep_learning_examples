@@ -1,13 +1,29 @@
 import time
 
 from matplotlib import pyplot as plt
-from torch import nn, optim
+from torch import nn, optim, Tensor
 from torchinfo import summary
 
 from celeba_autoencoder.autoencoder import Autoencoder
 from celeba_autoencoder.load import load_celeba
 from utils.cuda import print_cuda_configuration
 from utils.seeds import set_seeds
+
+
+def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display: int = 10):
+    """
+    Display the original and reconstructed images.
+    :param original: Original images.
+    :param reconstructed: Reconstructed images.
+    :param num_display: Number of original-reconstructed image pairs to display.
+    :return:
+    """
+    fig, axes = plt.subplots(nrows=2, ncols=num_display, sharex=True, sharey=True, figsize=(20, 4))
+    for images, row in zip([original, reconstructed], axes):
+        for img, ax in zip(images, row):
+            ax.imshow(img.view(218, 178, 3).detach().numpy())
+            ax.get_xaxis().set_visible(False)
+            ax.get_yaxis().set_visible(False)
 
 
 def main():
@@ -21,7 +37,7 @@ def main():
         'data_dir': '/home/mfaulk/data/celeba/CelebA/Img/img_align_celeba',
 
         # Batch size for training
-        'batch_size': 100,
+        'batch_size': 200,
 
         # Number of passes over the training data
         'num_epochs': 3,
@@ -61,14 +77,23 @@ def main():
         elapsed_time = time.time() - start_time
         print(f'Epoch [{epoch + 1}/{config["num_epochs"]}], Loss: {loss.item():.4f}, Time: {elapsed_time:.2f} seconds')
 
-    # Testing loss
-
-    # Plot the per-batch training loss.
+    # Monitor the per-batch training loss.
     plt.figure(1)
     plt.plot(per_batch_loss)
     plt.xlabel('Batch')
     plt.ylabel('Loss')
     plt.title('Per-batch Training Loss')
+
+    # Testing
+    test_data_iter = iter(test_loader)
+    test_images, _labels = next(test_data_iter)
+    test_images = test_images.cuda()
+
+    (reconstructed, _code) = autoencoder.forward(test_images)
+
+    # test_images = test_images.cpu()
+    # reconstructed = reconstructed.cpu()
+    # display_reconstructions(test_images, reconstructed)
 
     plt.show()
 
