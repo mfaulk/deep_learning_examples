@@ -22,10 +22,10 @@ def get_mnist_data(data_dir: str, batch_size: int) -> (DataLoader, DataLoader):
 
     trainset = MNIST(root=data_dir, train=True, download=True, transform=transform)
     print(f"Number of MNIST training examples: {len(trainset)}")
-    trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True)
+    trainloader = DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=4)
 
     testset = torchvision.datasets.MNIST(root='./data', train=False, download=True, transform=transform)
     print(f"Number of MNIST testing examples: {len(testset)}")
-    testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=4)
 
     return trainloader, testloader
