@@ -2,10 +2,10 @@ import torch
 
 
 def print_cuda_configuration():
-    '''
+    """
     Display CUDA availability and configuration information.
     :return:
-    '''
+    """
     print(f"Torch version {torch.__version__}")
 
     if torch.cuda.is_available():

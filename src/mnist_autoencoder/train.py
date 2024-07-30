@@ -102,8 +102,6 @@ def main():
     # Number of folds for k-fold cross-validation.
     k_folds = 5
 
-    # === Model ===
-
     # === Data ===
     train_loader, test_loader = get_mnist_data(data_path, batch_size)
 
