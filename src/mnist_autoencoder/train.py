@@ -16,31 +16,6 @@ from src.utils.cuda import print_cuda_configuration
 from src.utils.seeds import set_seeds
 
 
-def testing_loss(autoencoder: Autoencoder, test_loader: DataLoader, mse: nn.MSELoss) -> float:
-    """
-    Compute the average testing loss.
-    :param autoencoder: Autoencoder model.
-    :param test_loader: DataLoader for testing data.
-    :param mse: Mean Squared Error loss function.
-    :return: Testing loss.
-    """
-    test_loss = 0.0
-
-    num_test_examples = len(test_loader)
-    autoencoder.eval()  # Set model to evaluation mode.
-    with torch.no_grad():  # Disable gradient calculation.
-        for img_batch, _labels in test_loader:
-            # img_batch is a tensor of shape (batch_size, 784)
-            img_batch = img_batch.cuda()  # Move to GPU
-
-            # Forward pass
-            output, code = autoencoder(img_batch)
-            loss = mse(output, img_batch)
-            test_loss += loss.item()
-
-    return test_loss / num_test_examples
-
-
 def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display: int = 10):
     """
     Display the original and reconstructed images.
@@ -57,34 +32,41 @@ def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display
             ax.get_yaxis().set_visible(False)
 
 
-def train(model: Autoencoder, train_loader: DataLoader, optimizer, criterion, num_epochs: int) -> List[float]:
+def train(
+        model: nn.Module,
+        device: torch.device,
+        train_loader: DataLoader,
+        optimizer: torch.optim.Optimizer,
+        criterion: nn.Module,
+        num_epochs: int
+) -> List[float]:
     """
     Train the autoencoder model.
     :param model: Initial model. This model will be modified during training.
+    :param device: Device to run the model on.
     :param train_loader: training data loader.
     :param optimizer: Optimizer for training.
     :param criterion: Loss function.
     :param num_epochs: Number of epochs for training.
     :return: Per-batch training loss.
     """
-    # loss_fn: nn.MSELoss = nn.MSELoss()
-    # optimizer = optim.Adam(model.parameters(), lr=config.learning_rate)
 
     # Per-batch training loss
     per_batch_loss: List[float] = []
 
     # === Training ===
+    loss = 0
     for epoch in range(num_epochs):
-        start_time = time.time()  # Start time for the epoch
+        start_time = time.time()
         for inputs, _labels in train_loader:
-            inputs = inputs.cuda()  # Move batch to GPU
+            inputs = inputs.to(device)
 
             # Forward pass
             outputs, code = model(inputs)
             loss = criterion(outputs, inputs)
             per_batch_loss.append(loss.item())
 
-            # Backward pass and optimization
+            # Backward pass and parameter updates
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -95,9 +77,36 @@ def train(model: Autoencoder, train_loader: DataLoader, optimizer, criterion, nu
     return per_batch_loss
 
 
+def evaluate(
+        model: nn.Module,
+        device: torch.device,
+        val_loader: DataLoader,
+        criterion: nn.Module
+) -> float:
+    """
+    Evaluate the reconstruction loss on validation data.
+    :param model: NN model.
+    :param device: Device to run the model on.
+    :param val_loader: DataLoader for validation data.
+    :param criterion: Loss function.
+    :return: Average loss on validation data.
+    """
+    model.eval()  # Set model to evaluation mode.
+    loss = 0
+    with torch.no_grad():  # Disable gradient calculation.
+        for inputs, _target in val_loader:
+            inputs = inputs.to(device)
+            outputs, _codes = model(inputs)
+            loss += criterion(outputs, inputs)
+
+    avg_loss = loss / len(val_loader.dataset)
+    return avg_loss
+
+
 def main():
     set_seeds()
     print_cuda_configuration()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # === Configuration ===
 
@@ -117,15 +126,17 @@ def main():
     model: Autoencoder = Autoencoder().cuda()
     summary(model, input_size=(batch_size, 28 * 28))
 
-    # === Training ===
+    # === Data ===
     train_loader, test_loader = get_mnist_data(data_path, batch_size)
+
+    # === Training ===
     criterion: nn.MSELoss = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-    per_batch_loss: List[float] = train(model, train_loader, optimizer, criterion, num_epochs)
+    per_batch_loss: List[float] = train(model, device, train_loader, optimizer, criterion, num_epochs)
 
     # === Testing ===
-    avg_test_loss = testing_loss(model, test_loader, criterion)
+    avg_test_loss = evaluate(model, device, test_loader, criterion)
     print(f'Average Testing Loss: {avg_test_loss:.4f}')
 
     # === Visualizations ===
