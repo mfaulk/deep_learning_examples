@@ -21,6 +21,13 @@ scikit-learn = "^1.5.1"
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"  # The required version of Pytest for development
 
+[tool.poetry.source]
+name = "src"
+path = "src"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]  # The build system requirements
 build-backend = "poetry.core.masonry.api"  # The build backend to use
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]  # The path to the test files

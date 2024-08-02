@@ -1,38 +1,52 @@
 # Autoencoder neural network for MNIST dataset.
 
+from typing import List
+
 import torch.nn as nn
 from torch import Tensor
 
 
 # Autoencoder model. 784 -> 128 -> 64 -> [12] -> 64 -> 128 -> 784
 class Autoencoder(nn.Module):
-    def __init__(self):
+    def __init__(self, layer_sizes: List[int]) -> None:
+        """
+        An Autoencoder with "mirrored" encoder and decoder architecture.
+
+        The decoder is the mirror of the encoder. The first layer size must be the input size, and the last layer
+        size must be the code size. layer_sizes must have at least 2 elements. This ensures that the input size and
+        code size are specified.
+
+        :param layer_sizes: List of layer sizes for the encoder.
+        """
+
         super(Autoencoder, self).__init__()
-        self.encoder = nn.Sequential(
-            # Layer 1: 784 -> 128
-            nn.Linear(28 * 28, 128),
-            nn.ReLU(True),
+        # The input size and code size must be specified.
+        if len(layer_sizes) < 2:
+            raise ValueError("layer_sizes must have at least 2 elements.")
 
-            # Layer 2: 128 -> 64
-            nn.Linear(128, 64),
-            nn.ReLU(True),
+        # Encoder
+        encoder_layers = []
+        input_size = layer_sizes[0]
+        for i, output_size in enumerate(layer_sizes[1:]):
+            encoder_layers.append(nn.Linear(input_size, output_size))
+            if i < len(layer_sizes) - 2:  # Add ReLU for all but the last layer
+                encoder_layers.append(nn.ReLU())
+            input_size = output_size
+        self.encoder = nn.Sequential(*encoder_layers)
 
-            # Layer 3: 64 -> 12
-            nn.Linear(64, 12),
-        )
-        self.decoder = nn.Sequential(
-            # Layer 4: 12 -> 64
-            nn.Linear(12, 64),
-            nn.ReLU(True),
-
-            # Layer 5: 64 -> 128
-            nn.Linear(64, 128),
-            nn.ReLU(True),
-
-            # Layer 6: 128 -> 784
-            nn.Linear(128, 28 * 28),
-            nn.Tanh()
-        )
+        # Decoder
+        decoder_layers = []
+        reversed_layer_sizes = layer_sizes.copy()
+        reversed_layer_sizes.reverse()
+        input_size = reversed_layer_sizes[0]
+        for i, output_size in enumerate(reversed_layer_sizes[1:]):
+            decoder_layers.append(nn.Linear(input_size, output_size))
+            if i < len(layer_sizes) - 2:  # Add ReLU for all but the last layer
+                decoder_layers.append(nn.ReLU())
+            input_size = output_size
+        # Add tanh to the last layer
+        decoder_layers.append(nn.Tanh())
+        self.decoder = nn.Sequential(*decoder_layers)
 
     def forward(self, x: Tensor) -> (Tensor, Tensor):
         """

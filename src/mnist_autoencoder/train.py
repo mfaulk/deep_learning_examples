@@ -1,6 +1,6 @@
 # Train an autoencoder on the MNIST dataset.
 
-from typing import List, Type
+from typing import List, Callable
 
 import matplotlib.pyplot as plt
 import torch
@@ -37,7 +37,7 @@ def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display
 def k_fold_cross_validation(
         k: int,
         dataset: Dataset,
-        model_class: Type[nn.Module],
+        model_factory: Callable[[], Autoencoder],
         device: torch.device,
         criterion: nn.Module,
         batch_size: int,
@@ -47,7 +47,7 @@ def k_fold_cross_validation(
     Perform k-fold cross-validation.
     :param k: Number of folds.
     :param dataset: Dataset to split into k folds.
-    :param model_class: Model class to instantiate.
+    :param model_factory: Factory function for the model.
     :param device: Device to run the model on.
     :param criterion: Loss function.
     :param batch_size: Training batch size.
@@ -62,7 +62,7 @@ def k_fold_cross_validation(
     validation_losses = []
 
     for fold, (train_indices, val_indices) in enumerate(kfold.split(dataset)):
-        print(f'Fold {fold + 1}')
+        print(f'Fold {fold}')
 
         train_subset = Subset(dataset, train_indices)
         validation_subset = Subset(dataset, val_indices)
@@ -70,7 +70,8 @@ def k_fold_cross_validation(
         train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True, num_workers=4)
         validation_loader = DataLoader(validation_subset, batch_size=batch_size, shuffle=False, num_workers=4)
 
-        model = model_class().to(device)
+        model = model_factory().to(device)
+        # summary(model, input_size=(batch_size, 28 * 28))
         optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
         train_autoencoder(model, device, train_loader, optimizer, criterion, num_epochs)
@@ -109,13 +110,18 @@ def main():
     criterion: nn.MSELoss = nn.MSELoss()
 
     # Model selection via k-fold cross-validation.
+
+    layer_sizes = [784, 16]  # Example layer sizes for an autoencoder
+    model_factory = lambda: Autoencoder(layer_sizes)
+
     loss_per_folding = k_fold_cross_validation(
-        k_folds, train_loader.dataset, Autoencoder, device, criterion, batch_size, learning_rate, num_epochs)
-    print(f'Average Validation Loss: {sum(loss_per_folding) / k_folds:.4f}')
+        k_folds, train_loader.dataset, model_factory, device, criterion, batch_size, learning_rate, num_epochs)
+    print(f'Average Validation Loss across Folds: {sum(loss_per_folding) / k_folds:.4f}')
 
     # Train the final model on the full training data.
-    print('Training the final model on the full training data.')
-    model: Autoencoder = Autoencoder().cuda()
+
+    print('\nTraining the final model on the full training data.')
+    model: Autoencoder = Autoencoder(layer_sizes).cuda()
     summary(model, input_size=(batch_size, 28 * 28))
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     per_batch_loss: List[float] = train_autoencoder(model, device, train_loader, optimizer, criterion, num_epochs)
@@ -123,7 +129,7 @@ def main():
     # === Testing ===
 
     avg_test_loss = evaluate_autoencoder(model, device, test_loader, criterion)
-    print(f'Average Testing Loss: {avg_test_loss:.4f}')
+    print(f'\nAverage Testing Loss: {avg_test_loss:.4f}')
 
     # === Visualizations ===
     test_data_iter = iter(test_loader)
