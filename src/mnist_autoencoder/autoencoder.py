@@ -6,7 +6,7 @@ import torch.nn as nn
 from torch import Tensor
 
 
-# Autoencoder model. 784 -> 128 -> 64 -> [12] -> 64 -> 128 -> 784
+# Autoencoder model. The encoder and decoder are symmetric.
 class Autoencoder(nn.Module):
     def __init__(self, layer_sizes: List[int]) -> None:
         """
@@ -25,7 +25,7 @@ class Autoencoder(nn.Module):
             raise ValueError("layer_sizes must have at least 2 elements.")
 
         # Encoder
-        encoder_layers = []
+        encoder_layers: List[nn.Module] = []
         input_size = layer_sizes[0]
         for i, output_size in enumerate(layer_sizes[1:]):
             encoder_layers.append(nn.Linear(input_size, output_size))
@@ -35,7 +35,7 @@ class Autoencoder(nn.Module):
         self.encoder = nn.Sequential(*encoder_layers)
 
         # Decoder
-        decoder_layers = []
+        decoder_layers: List[nn.Module] = []
         reversed_layer_sizes = layer_sizes.copy()
         reversed_layer_sizes.reverse()
         input_size = reversed_layer_sizes[0]
