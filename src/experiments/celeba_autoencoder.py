@@ -4,8 +4,8 @@ from matplotlib import pyplot as plt
 from torch import nn, optim, Tensor
 from torchinfo import summary
 
-from celeba_autoencoder.autoencoder import Autoencoder
-from celeba_autoencoder.load import load_celeba
+from datasets.celeba import load_celeba
+from neural_networks.symmetric_autoencoder import SymmetricAutoencoder
 from utils.cuda import print_cuda_configuration
 from utils.seeds import set_seeds
 
@@ -44,7 +44,7 @@ def main() -> None:
 
     train_loader, test_loader = load_celeba(celeba_path, batch_size)
 
-    autoencoder: Autoencoder = Autoencoder()
+    autoencoder = SymmetricAutoencoder([218 * 178 * 3, 500, 320])
     autoencoder.cuda()
     summary(autoencoder, input_size=(batch_size, 218 * 178 * 3))
 

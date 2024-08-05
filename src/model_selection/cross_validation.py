@@ -5,9 +5,9 @@ from sklearn.model_selection import KFold
 from torch import nn, optim
 from torch.utils.data import Dataset, Subset, DataLoader
 
-from evaluating import evaluate_autoencoder
+from neural_networks.evaluating import evaluate_autoencoder
 from neural_networks.symmetric_autoencoder import SymmetricAutoencoder
-from training import train_autoencoder
+from neural_networks.training import train_autoencoder
 
 
 def k_fold_cross_validation(

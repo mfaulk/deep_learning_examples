@@ -8,14 +8,14 @@ from torch import Tensor, optim
 from torch import nn
 from torchinfo import summary
 
-from evaluating import evaluate_autoencoder
-from mnist.load import get_mnist_data
+from datasets.mnist import get_mnist_data
 from model_selection.configuration_space import generate_configurations
 from model_selection.cross_validation import k_fold_cross_validation
+from neural_networks.evaluating import evaluate_autoencoder
 from neural_networks.symmetric_autoencoder import SymmetricAutoencoder
+from neural_networks.training import train_autoencoder
 from src.utils.cuda import print_cuda_configuration
 from src.utils.seeds import set_seeds
-from training import train_autoencoder
 
 
 def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display: int = 10) -> None:
