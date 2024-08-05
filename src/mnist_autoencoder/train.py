@@ -1,19 +1,18 @@
 # Train an autoencoder on the MNIST dataset.
 
-from typing import List, Callable
+from typing import List
 
 import matplotlib.pyplot as plt
 import torch
-from sklearn.model_selection import KFold
 from torch import Tensor, optim
 from torch import nn
-from torch.utils.data import DataLoader, Subset, Dataset
 from torchinfo import summary
 
 from evaluating import evaluate_autoencoder
-from model_selection.networks import generate_configurations
-from src.mnist_autoencoder.autoencoder import Autoencoder
-from src.mnist_autoencoder.load import get_mnist_data
+from mnist.load import get_mnist_data
+from model_selection.configuration_space import generate_configurations
+from model_selection.cross_validation import k_fold_cross_validation
+from neural_networks.symmetric_autoencoder import SymmetricAutoencoder
 from src.utils.cuda import print_cuda_configuration
 from src.utils.seeds import set_seeds
 from training import train_autoencoder
@@ -33,53 +32,6 @@ def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display
             ax.imshow(img.view(28, 28).detach().numpy(), cmap='gray')
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
-
-
-def k_fold_cross_validation(
-        k: int,
-        dataset: Dataset,
-        model_factory: Callable[[], Autoencoder],
-        device: torch.device,
-        criterion: nn.Module,
-        batch_size: int,
-        learning_rate: float,
-        num_epochs: int) -> List[float]:
-    """
-    Perform k-fold cross-validation.
-    :param k: Number of folds.
-    :param dataset: Dataset to split into k folds.
-    :param model_factory: Factory function for the model.
-    :param device: Device to run the model on.
-    :param criterion: Loss function.
-    :param batch_size: Training batch size.
-    :param learning_rate: Learning rate for the optimizer.
-    :param num_epochs: Number of training epochs.
-    :return: Average validation loss on each fold.
-    """
-
-    kfold = KFold(n_splits=k, shuffle=True)
-
-    # Validation loss of each folding.
-    validation_losses = []
-
-    for fold, (train_indices, val_indices) in enumerate(kfold.split(dataset)):
-        print(f'Fold {fold}')
-
-        train_subset = Subset(dataset, train_indices)
-        validation_subset = Subset(dataset, val_indices)
-
-        train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True, num_workers=4)
-        validation_loader = DataLoader(validation_subset, batch_size=batch_size, shuffle=False, num_workers=4)
-
-        model = model_factory().to(device)
-        # summary(model, input_size=(batch_size, 28 * 28))
-        optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-
-        train_autoencoder(model, device, train_loader, optimizer, num_epochs)
-        loss = evaluate_autoencoder(model, device, validation_loader, criterion)
-        validation_losses.append(loss)
-
-    return validation_losses
 
 
 def main() -> None:
@@ -126,8 +78,8 @@ def main() -> None:
         configuration = [784] + configuration
         print(f'Trying configuration: {configuration}')
 
-        def model_factory() -> Autoencoder:
-            return Autoencoder(configuration)
+        def model_factory() -> SymmetricAutoencoder:
+            return SymmetricAutoencoder(configuration)
 
         loss_per_folding = k_fold_cross_validation(
             k_folds, train_loader.dataset, model_factory, device, criterion, batch_size, learning_rate, num_epochs)
@@ -148,7 +100,7 @@ def main() -> None:
     # === Training the final model ===
 
     print('\nTraining the final model on the full training data.')
-    model: Autoencoder = Autoencoder(best_configuration).cuda()
+    model: SymmetricAutoencoder = SymmetricAutoencoder(best_configuration).cuda()
     summary(model, input_size=(batch_size, 28 * 28))
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     per_batch_loss: List[float] = train_autoencoder(model, device, train_loader, optimizer, num_epochs)

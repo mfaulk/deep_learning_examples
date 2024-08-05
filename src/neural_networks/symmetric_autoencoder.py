@@ -6,8 +6,8 @@ import torch.nn as nn
 from torch import Tensor
 
 
-# Autoencoder model. The encoder and decoder are symmetric.
-class Autoencoder(nn.Module):
+# Autoencoder with symmetric or "mirrored" encoder and decoder architecture.
+class SymmetricAutoencoder(nn.Module):
     def __init__(self, layer_sizes: List[int]) -> None:
         """
         An Autoencoder with "mirrored" encoder and decoder architecture.
@@ -19,7 +19,7 @@ class Autoencoder(nn.Module):
         :param layer_sizes: List of layer sizes for the encoder.
         """
 
-        super(Autoencoder, self).__init__()
+        super(SymmetricAutoencoder, self).__init__()
         # The input size and code size must be specified.
         if len(layer_sizes) < 2:
             raise ValueError("layer_sizes must have at least 2 elements.")

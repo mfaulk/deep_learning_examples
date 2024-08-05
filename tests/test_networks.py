@@ -1,7 +1,7 @@
 import unittest
 from typing import List
 
-from model_selection.networks import generate_configurations
+from model_selection.configuration_space import generate_configurations
 
 
 class TestGenerateConfigurations(unittest.TestCase):
