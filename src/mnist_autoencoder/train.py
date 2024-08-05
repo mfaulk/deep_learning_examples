@@ -112,7 +112,9 @@ def main() -> None:
     # Model selection via k-fold cross-validation.
 
     layer_sizes = [784, 256, 64, 16]  # Example layer sizes for an autoencoder
-    model_factory = lambda: Autoencoder(layer_sizes)
+
+    def model_factory() -> Autoencoder:
+        return Autoencoder(layer_sizes)
 
     loss_per_folding = k_fold_cross_validation(
         k_folds, train_loader.dataset, model_factory, device, criterion, batch_size, learning_rate, num_epochs)

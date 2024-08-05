@@ -23,8 +23,7 @@ def load_celeba(path: str, batch_size: int) -> Tuple[DataLoader, DataLoader]:
 
     # Load the full dataset
     full_dataset: ImageFolder = ImageFolder(root=path, transform=transform)
-    num_images: int = len(full_dataset)
-
+    
     # Split the dataset into training and testing sets
     train = 0.8
     test = 0.2
