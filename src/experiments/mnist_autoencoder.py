@@ -48,7 +48,7 @@ def main() -> None:
     batch_size = 100
 
     # Number of passes over the training data.
-    num_epochs = 2
+    num_epochs = 3
 
     # Learning rate for the optimizer.
     learning_rate = 1e-3
@@ -64,12 +64,12 @@ def main() -> None:
 
     # Model selection via k-fold cross-validation.
 
-    width_options = [32, 64, 128]
+    widths = [32, 64, 128, 256]
     min_depth = 1
-    max_depth = 3
+    max_depth = 1
 
     # Generate all possible configurations.
-    all_configurations = generate_configurations(min_depth, max_depth, width_options)
+    all_configurations = generate_configurations(min_depth, max_depth, widths)
     min_cost = float('inf')
     best_configuration = all_configurations[0]
 
@@ -87,15 +87,6 @@ def main() -> None:
         if avg_loss < min_cost:
             min_cost = avg_loss
             best_configuration = configuration
-
-    # layer_sizes = [784, 256, 64, 16]  # Example layer sizes for an autoencoder
-    #
-    # def model_factory() -> Autoencoder:
-    #     return Autoencoder(layer_sizes)
-    #
-    # loss_per_folding = k_fold_cross_validation(
-    #     k_folds, train_loader.dataset, model_factory, device, criterion, batch_size, learning_rate, num_epochs)
-    # print(f'Average Validation Loss across Folds: {sum(loss_per_folding) / k_folds:.4f}')
 
     # === Training the final model ===
 
