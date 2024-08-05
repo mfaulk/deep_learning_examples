@@ -10,7 +10,7 @@ from utils.cuda import print_cuda_configuration
 from utils.seeds import set_seeds
 
 
-def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display: int = 10):
+def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display: int = 10) -> None:
     """
     Display the original and reconstructed images.
     :param original: Original images.
@@ -26,40 +26,36 @@ def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display
             ax.get_yaxis().set_visible(False)
 
 
-def main():
+def main() -> None:
     # Set seeds for reproducibility
     set_seeds()
 
     print_cuda_configuration()
 
-    config = {
-        # Directory where downloaded data is stored.
-        'data_dir': '/home/mfaulk/data/celeba/CelebA/Img/img_align_celeba',
+    celeba_path = '/home/mfaulk/data/celeba/CelebA/Img/img_align_celeba'
 
-        # Batch size for training
-        'batch_size': 200,
+    batch_size = 200
 
-        # Number of passes over the training data
-        'num_epochs': 3,
+    # Number of passes over the training data
+    num_epochs = 3
 
-        # Learning rate for the optimizer
-        'lr': 1e-3,
-    }
+    # Learning rate for the Adam optimizer.
+    learning_rate = 1e-3
 
-    train_loader, test_loader = load_celeba(config['data_dir'], config['batch_size'])
+    train_loader, test_loader = load_celeba(celeba_path, batch_size)
 
     autoencoder: Autoencoder = Autoencoder()
     autoencoder.cuda()
-    summary(autoencoder, input_size=(config['batch_size'], 218 * 178 * 3))
+    summary(autoencoder, input_size=(batch_size, 218 * 178 * 3))
 
     loss_fn: nn.MSELoss = nn.MSELoss()
-    optimizer = optim.Adam(autoencoder.parameters(), lr=config['lr'])
+    optimizer = optim.Adam(autoencoder.parameters(), lr=learning_rate)
 
     # Per-batch training loss
     per_batch_loss = []
 
     # === Training ===
-    for epoch in range(config['num_epochs']):
+    for epoch in range(num_epochs):
         start_time = time.time()  # Start time for the epoch
         for img_batch, _labels in train_loader:
             img_batch = img_batch.cuda()  # Move batch to GPU
@@ -75,7 +71,7 @@ def main():
             optimizer.step()
 
         elapsed_time = time.time() - start_time
-        print(f'Epoch [{epoch + 1}/{config["num_epochs"]}], Loss: {loss.item():.4f}, Time: {elapsed_time:.2f} seconds')
+        print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}, Time: {elapsed_time:.2f} seconds')
 
     # Monitor the per-batch training loss.
     plt.figure(1)

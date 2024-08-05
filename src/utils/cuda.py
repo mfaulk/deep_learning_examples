@@ -1,7 +1,7 @@
 import torch
 
 
-def print_cuda_configuration():
+def print_cuda_configuration() -> None:
     """
     Display CUDA availability and configuration information.
     :return:

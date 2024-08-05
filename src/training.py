@@ -11,7 +11,6 @@ def train_autoencoder(
         device: torch.device,
         train_loader: DataLoader,
         optimizer: torch.optim.Optimizer,
-        criterion: nn.Module,
         num_epochs: int
 ) -> List[float]:
     """
@@ -20,24 +19,31 @@ def train_autoencoder(
     :param device: Device to run the model on.
     :param train_loader: training data loader. Data must be a tuple (inputs, labels).
     :param optimizer: Optimizer for training.
-    :param criterion: Loss function.
     :param num_epochs: Number of epochs for training.
     :return: Per-batch training loss.
     """
 
-    # Per-batch training loss
+    # Per-batch training loss. This includes batches from all epochs.
     per_batch_loss: List[float] = []
 
     # === Training ===
-    loss = 0
+    model.train()
     for epoch in range(num_epochs):
+
+        # Average batch loss in this epoch.
+        # TODO: avg loss per sample would be clearer.
+        epoch_avg_batch_loss = 0.0
+
         start_time = time.time()
+        # Iterate over training batches.
         for inputs, _labels in train_loader:
             inputs = inputs.to(device)
 
             # Forward pass
-            outputs, code = model(inputs)
-            loss = criterion(outputs, inputs)
+            outputs, _code = model(inputs)
+            loss = nn.MSELoss()
+            loss = loss(outputs, inputs)
+            epoch_avg_batch_loss += loss.item()
             per_batch_loss.append(loss.item())
 
             # Backward pass and parameter updates
@@ -46,6 +52,9 @@ def train_autoencoder(
             optimizer.step()
 
         elapsed_time = time.time() - start_time
-        print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}, Time: {elapsed_time:.2f} seconds')
+        num_batches = len(train_loader)
+        epoch_avg_batch_loss /= num_batches
+        print(
+            f'Epoch [{epoch + 1}/{num_epochs}], Averge Loss per Batch: {epoch_avg_batch_loss:.4f}, Time: {elapsed_time:.2f} seconds')
 
     return per_batch_loss

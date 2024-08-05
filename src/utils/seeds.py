@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 
-def set_seeds(seed: int = 42):
+def set_seeds(seed: int = 42) -> None:
     """
     Set seeds for reproducibility.
     :param seed:

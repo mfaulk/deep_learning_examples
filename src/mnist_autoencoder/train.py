@@ -18,7 +18,7 @@ from src.utils.seeds import set_seeds
 from training import train_autoencoder
 
 
-def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display: int = 10):
+def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display: int = 10) -> None:
     """
     Display the original and reconstructed images.
     :param original: Original images.
@@ -74,14 +74,14 @@ def k_fold_cross_validation(
         # summary(model, input_size=(batch_size, 28 * 28))
         optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-        train_autoencoder(model, device, train_loader, optimizer, criterion, num_epochs)
+        train_autoencoder(model, device, train_loader, optimizer, num_epochs)
         loss = evaluate_autoencoder(model, device, validation_loader, criterion)
         validation_losses.append(loss)
 
     return validation_losses
 
 
-def main():
+def main() -> None:
     set_seeds()
     print_cuda_configuration()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -111,7 +111,7 @@ def main():
 
     # Model selection via k-fold cross-validation.
 
-    layer_sizes = [784, 16]  # Example layer sizes for an autoencoder
+    layer_sizes = [784, 256, 64, 16]  # Example layer sizes for an autoencoder
     model_factory = lambda: Autoencoder(layer_sizes)
 
     loss_per_folding = k_fold_cross_validation(
@@ -124,7 +124,7 @@ def main():
     model: Autoencoder = Autoencoder(layer_sizes).cuda()
     summary(model, input_size=(batch_size, 28 * 28))
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    per_batch_loss: List[float] = train_autoencoder(model, device, train_loader, optimizer, criterion, num_epochs)
+    per_batch_loss: List[float] = train_autoencoder(model, device, train_loader, optimizer, num_epochs)
 
     # === Testing ===
 

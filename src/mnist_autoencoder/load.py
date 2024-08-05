@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import torch
 import torchvision
 from torch.utils.data import DataLoader
@@ -5,13 +7,13 @@ from torchvision import transforms as transforms
 from torchvision.datasets import MNIST
 
 
-def get_mnist_data(data_dir: str, batch_size: int) -> (DataLoader, DataLoader):
-    '''
+def get_mnist_data(data_dir: str, batch_size: int) -> Tuple[DataLoader, DataLoader]:
+    """
     Get MNIST Training and Testing data sets.
     :param data_dir: Directory where downloaded data is stored.
     :param batch_size: Batch size for training and testing data.
     :return: (train_loader, test_loader)
-    '''
+    """
 
     # Transform to normalize pixel values and flatten images to 1D tensor.
     transform = transforms.Compose([

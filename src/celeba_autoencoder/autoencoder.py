@@ -1,4 +1,5 @@
 # Autoencoder for the CelebA image dataset.
+from typing import Tuple
 
 import torch.nn as nn
 from torch import Tensor
@@ -9,7 +10,7 @@ from torch import Tensor
 # CelebA images are 218 x 178 x 3 = 116_412 pixels
 # 116_412 -> [320] -> 116_412
 class Autoencoder(nn.Module):
-    def __init__(self):
+    def __init__(self) -> None:
         super(Autoencoder, self).__init__()
         self.encoder = nn.Sequential(
             # Layer 1: 116_412 -> 500
@@ -25,7 +26,7 @@ class Autoencoder(nn.Module):
             nn.Tanh()
         )
 
-    def forward(self, x: Tensor) -> (Tensor, Tensor):
+    def forward(self, x: Tensor) -> Tuple[Tensor, Tensor]:
         """
         Forward pass of the autoencoder model.
 

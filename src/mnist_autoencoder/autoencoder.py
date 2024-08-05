@@ -1,6 +1,6 @@
 # Autoencoder neural network for MNIST dataset.
 
-from typing import List
+from typing import List, Tuple
 
 import torch.nn as nn
 from torch import Tensor
@@ -48,7 +48,7 @@ class Autoencoder(nn.Module):
         decoder_layers.append(nn.Tanh())
         self.decoder = nn.Sequential(*decoder_layers)
 
-    def forward(self, x: Tensor) -> (Tensor, Tensor):
+    def forward(self, x: Tensor) -> Tuple[Tensor, Tensor]:
         """
         Forward pass of the autoencoder model.
 

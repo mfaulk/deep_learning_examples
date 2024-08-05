@@ -1,10 +1,12 @@
+from typing import Tuple
+
 import torch
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
 
-def load_celeba(path: str, batch_size: int) -> (DataLoader, DataLoader):
+def load_celeba(path: str, batch_size: int) -> Tuple[DataLoader, DataLoader]:
     """
     Get CelebA Training and Testing data sets. Each image has size 218 x 178 x 3.
     :param path: Path to a directory of images.

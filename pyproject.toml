@@ -1,33 +1,42 @@
 [tool.poetry]
-name = "pytorch_examples"  # The project name
-version = "0.1.0"  # The project version
-description = "NN examples using Pytorch"  # A brief description of the project
-authors = ["Your Name <your.email@example.com>"]  # The author's name and contact information
-license = "MIT"  # The project's license
-readme = "README.md"  # The path to the README file
-packages = [{ include = "*", from = "src" }]
+name = "pytorch_examples"
+version = "0.1.0"
+description = "NN examples using Pytorch"
+authors = ["Matt Faulkner mnfaulk@gmail.com"]
+license = "MIT"
+readme = "README.md"
+packages = [
+    { include = "*", from = "src" },
+    { include = "mypackage/py.typed" }
+]
 
 
 [tool.poetry.dependencies]
-python = "^3.12"  # The required Python version
-torch = "^2.3.0"  # The required version of PyTorch
-torchvision = "^0.18.0"  # The required version of Torchvision
-matplotlib = "^3.9.0"  # The required version of Matplotlib
-numpy = "^2.0.0"  # The required version of NumPy
+python = "^3.12"
+torch = "^2.3.0"
+torchvision = "^0.18.0"
+matplotlib = "^3.9.0"
+numpy = "^2.0.0"
 torchinfo = "^1.8.0"
 gdown = "^5.2.0"
 scikit-learn = "^1.5.1"
 
 [tool.poetry.dev-dependencies]
-pytest = "^7.2.0"  # The required version of Pytest for development
-
-[tool.poetry.source]
-name = "src"
-path = "src"
+pytest = "^7.2.0"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]  # The build system requirements
-build-backend = "poetry.core.masonry.api"  # The build backend to use
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]  # The path to the test files
+
+[tool.mypy]
+python_version = "3.8"
+ignore_missing_imports = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+show_error_codes = true
