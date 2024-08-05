@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader, Subset, Dataset
 from torchinfo import summary
 
 from evaluating import evaluate_autoencoder
+from model_selection.networks import generate_configurations
 from src.mnist_autoencoder.autoencoder import Autoencoder
 from src.mnist_autoencoder.load import get_mnist_data
 from src.utils.cuda import print_cuda_configuration
@@ -95,13 +96,13 @@ def main() -> None:
     batch_size = 100
 
     # Number of passes over the training data.
-    num_epochs = 3
+    num_epochs = 2
 
     # Learning rate for the optimizer.
     learning_rate = 1e-3
 
     # Number of folds for k-fold cross-validation.
-    k_folds = 5
+    k_folds = 3
 
     # === Data ===
     train_loader, test_loader = get_mnist_data(data_path, batch_size)
@@ -111,24 +112,43 @@ def main() -> None:
 
     # Model selection via k-fold cross-validation.
 
-    widths = [2 ** j for j in range(3, 9)]
-    max_encoder_hidden_layers = 3
-    # Candidate model architectures. Each element is a list of layer sizes for a symmetric autoencoder.
-    shapes: List[List[int]] = []
+    width_options = [32, 64, 128]
+    min_depth = 1
+    max_depth = 3
 
-    layer_sizes = [784, 256, 64, 16]  # Example layer sizes for an autoencoder
+    # Generate all possible configurations.
+    all_configurations = generate_configurations(min_depth, max_depth, width_options)
+    min_cost = float('inf')
+    best_configuration = all_configurations[0]
 
-    def model_factory() -> Autoencoder:
-        return Autoencoder(layer_sizes)
+    for configuration in all_configurations:
+        # The input layer size is 784 = (28 * 28).
+        configuration = [784] + configuration
+        print(f'Trying configuration: {configuration}')
 
-    loss_per_folding = k_fold_cross_validation(
-        k_folds, train_loader.dataset, model_factory, device, criterion, batch_size, learning_rate, num_epochs)
-    print(f'Average Validation Loss across Folds: {sum(loss_per_folding) / k_folds:.4f}')
+        def model_factory() -> Autoencoder:
+            return Autoencoder(configuration)
+
+        loss_per_folding = k_fold_cross_validation(
+            k_folds, train_loader.dataset, model_factory, device, criterion, batch_size, learning_rate, num_epochs)
+        avg_loss = sum(loss_per_folding) / k_folds
+        if avg_loss < min_cost:
+            min_cost = avg_loss
+            best_configuration = configuration
+
+    # layer_sizes = [784, 256, 64, 16]  # Example layer sizes for an autoencoder
+    #
+    # def model_factory() -> Autoencoder:
+    #     return Autoencoder(layer_sizes)
+    #
+    # loss_per_folding = k_fold_cross_validation(
+    #     k_folds, train_loader.dataset, model_factory, device, criterion, batch_size, learning_rate, num_epochs)
+    # print(f'Average Validation Loss across Folds: {sum(loss_per_folding) / k_folds:.4f}')
 
     # === Training the final model ===
 
     print('\nTraining the final model on the full training data.')
-    model: Autoencoder = Autoencoder(layer_sizes).cuda()
+    model: Autoencoder = Autoencoder(best_configuration).cuda()
     summary(model, input_size=(batch_size, 28 * 28))
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     per_batch_loss: List[float] = train_autoencoder(model, device, train_loader, optimizer, num_epochs)
