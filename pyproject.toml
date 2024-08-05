@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "pytorch_examples"
+name = "deep_learning_examples"
 version = "0.1.0"
 description = "NN examples using Pytorch"
-authors = ["Matt Faulkner mnfaulk@gmail.com"]
+authors = ["Matt Faulkner <mnfaulk@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 packages = [
     { include = "*", from = "src" },
-    { include = "mypackage/py.typed" }
+    { include = "py.typed" }
 ]
 
 
