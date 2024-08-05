@@ -57,7 +57,7 @@ poetry install
 To train the MNIST autoencoder, run the following command:
 
 ```bash
-poetry run python -m experiments.mnist_autoencoder
+poetry run python -m examples.mnist_autoencoder
 ```
 
 ## Contributing
