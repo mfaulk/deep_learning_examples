@@ -111,6 +111,11 @@ def main() -> None:
 
     # Model selection via k-fold cross-validation.
 
+    widths = [2 ** j for j in range(3, 9)]
+    max_encoder_hidden_layers = 3
+    # Candidate model architectures. Each element is a list of layer sizes for a symmetric autoencoder.
+    shapes: List[List[int]] = []
+
     layer_sizes = [784, 256, 64, 16]  # Example layer sizes for an autoencoder
 
     def model_factory() -> Autoencoder:
@@ -120,7 +125,7 @@ def main() -> None:
         k_folds, train_loader.dataset, model_factory, device, criterion, batch_size, learning_rate, num_epochs)
     print(f'Average Validation Loss across Folds: {sum(loss_per_folding) / k_folds:.4f}')
 
-    # Train the final model on the full training data.
+    # === Training the final model ===
 
     print('\nTraining the final model on the full training data.')
     model: Autoencoder = Autoencoder(layer_sizes).cuda()
@@ -134,6 +139,7 @@ def main() -> None:
     print(f'\nAverage Testing Loss: {avg_test_loss:.4f}')
 
     # === Visualizations ===
+
     test_data_iter = iter(test_loader)
     test_images, _labels = next(test_data_iter)
     test_images = test_images.cuda()
