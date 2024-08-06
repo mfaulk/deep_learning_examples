@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "deep_learning_examples"
 version = "0.1.0"
-description = "NN examples using Pytorch"
+description = "Deep Learning Examples with PyTorch"
 authors = ["Matt Faulkner <mnfaulk@gmail.com>"]
 license = "MIT"
 readme = "README.md"
@@ -23,6 +23,9 @@ scikit-learn = "^1.5.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.11.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

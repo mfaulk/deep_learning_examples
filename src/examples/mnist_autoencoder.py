@@ -18,7 +18,7 @@ from src.utils.cuda import print_cuda_configuration
 from src.utils.seeds import set_seeds
 
 
-def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display: int = 10) -> None:
+def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display: int = 5) -> None:
     """
     Display the original and reconstructed images.
     :param original: Original images.
