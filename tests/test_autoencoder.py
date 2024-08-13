@@ -13,11 +13,11 @@ class TestAutoencoder(unittest.TestCase):
     def test_num_encoder_layers(self):
         """
         The encoder should contain a linear layer between each pair of sizes in the layer sizes list.
-        Each linear layer except the last should be followed by a ReLU activation function.
+        Each linear layer should be followed by a ReLU activation function.
         """
         layer_sizes = [784, 256, 64, 16]
         expected_num_linear_layers = len(layer_sizes) - 1
-        expected_num_relu_layers = len(layer_sizes) - 2
+        expected_num_relu_layers = len(layer_sizes) - 1
         expected_len = expected_num_linear_layers + expected_num_relu_layers
         autoencoder = SymmetricAutoencoder(layer_sizes)
         self.assertEqual(len(autoencoder.encoder), expected_len)
