@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "deep_learning_examples"
+name = "deep-learning-examples"
 version = "0.1.0"
 description = "Deep Learning Examples with PyTorch"
 authors = ["Matt Faulkner <mnfaulk@gmail.com>"]

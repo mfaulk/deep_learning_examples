@@ -48,7 +48,7 @@ def main() -> None:
     batch_size = 100
 
     # Number of passes over the training data.
-    num_epochs = 3
+    num_epochs = 5
 
     # Learning rate for the optimizer.
     learning_rate = 1e-3
@@ -58,41 +58,13 @@ def main() -> None:
 
     # === Data ===
     train_loader, test_loader = get_mnist_data(data_path, batch_size)
+    image_size = 784  # 28 * 28 pixels.
 
     # === Training ===
     criterion: nn.MSELoss = nn.MSELoss()
-
-    # Model selection via k-fold cross-validation.
-
-    widths = [32, 64, 128, 256]
-    min_depth = 1
-    max_depth = 1
-
-    # Generate all possible configurations.
-    all_configurations = generate_configurations(min_depth, max_depth, widths)
-    min_cost = float('inf')
-    best_configuration = all_configurations[0]
-
-    for configuration in all_configurations:
-        # The input layer size is 784 = (28 * 28).
-        configuration = [784] + configuration
-        print(f'Trying configuration: {configuration}')
-
-        def model_factory() -> SymmetricAutoencoder:
-            return SymmetricAutoencoder(configuration)
-
-        loss_per_folding = k_fold_cross_validation(
-            k_folds, train_loader.dataset, model_factory, device, criterion, batch_size, learning_rate, num_epochs)
-        avg_loss = sum(loss_per_folding) / k_folds
-        if avg_loss < min_cost:
-            min_cost = avg_loss
-            best_configuration = configuration
-
-    # === Training the final model ===
-
-    print('\nTraining the final model on the full training data.')
-    model: SymmetricAutoencoder = SymmetricAutoencoder(best_configuration).cuda()
-    summary(model, input_size=(batch_size, 28 * 28))
+    layers = [image_size, 2500, 150]
+    model: SymmetricAutoencoder = SymmetricAutoencoder(layers).cuda()
+    summary(model, input_size=(batch_size, image_size))
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     per_batch_loss: List[float] = train_autoencoder(model, device, train_loader, optimizer, num_epochs)
 

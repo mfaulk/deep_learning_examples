@@ -29,8 +29,7 @@ class SymmetricAutoencoder(nn.Module):
         input_size = layer_sizes[0]
         for i, output_size in enumerate(layer_sizes[1:]):
             encoder_layers.append(nn.Linear(input_size, output_size))
-            if i < len(layer_sizes) - 2:  # Add ReLU for all but the last layer
-                encoder_layers.append(nn.ReLU())
+            encoder_layers.append(nn.ReLU())
             input_size = output_size
         self.encoder = nn.Sequential(*encoder_layers)
 
@@ -44,7 +43,7 @@ class SymmetricAutoencoder(nn.Module):
             if i < len(layer_sizes) - 2:  # Add ReLU for all but the last layer
                 decoder_layers.append(nn.ReLU())
             input_size = output_size
-        # Add tanh to the last layer
+        # Add tanh to the last layer to clamp the range of the output to [-1, 1].
         decoder_layers.append(nn.Tanh())
         self.decoder = nn.Sequential(*decoder_layers)
 
@@ -52,8 +51,8 @@ class SymmetricAutoencoder(nn.Module):
         """
         Forward pass of the autoencoder model.
 
-        :param x: input tensor of shape (batch_size, 28 * 28)
-        :return: Recovered tensor, code tensor
+        :param x: input tensor of shape (batch_size, input_size)
+        :return: Output, latent code
         """
         code = self.encoder(x)
         recovered = self.decoder(code)
