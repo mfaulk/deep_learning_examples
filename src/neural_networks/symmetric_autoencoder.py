@@ -1,4 +1,4 @@
-# Autoencoder neural network for MNIST dataset.
+# Autoencoder with symmetric or "mirrored" encoder and decoder architecture.
 
 from typing import List, Tuple
 
@@ -51,7 +51,7 @@ class SymmetricAutoencoder(nn.Module):
         """
         Forward pass of the autoencoder model.
 
-        :param x: input tensor of shape (batch_size, input_size)
+        :param x: Input tensor of shape (batch_size, input_size)
         :return: Output, latent code
         """
         code = self.encoder(x)
