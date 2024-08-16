@@ -49,7 +49,7 @@ def main() -> None:
     batch_size = 100
 
     # Number of passes over the training data.
-    num_epochs = 5
+    num_epochs = 10
 
     # Learning rate for the optimizer.
     learning_rate = 1e-3

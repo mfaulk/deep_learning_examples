@@ -45,6 +45,8 @@ class SymmetricAutoencoder(nn.Module):
             input_size = output_size
         # Add tanh to the last layer to clamp the range of the output to [-1, 1].
         decoder_layers.append(nn.Tanh())
+        # Add sigmoid to the last layer to clamp the range of the output to [0, 1].
+        # decoder_layers.append(nn.Sigmoid())
         self.decoder = nn.Sequential(*decoder_layers)
 
     def forward(self, x: Tensor) -> Tuple[Tensor, Tensor]:

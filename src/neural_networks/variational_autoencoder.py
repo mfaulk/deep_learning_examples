@@ -27,6 +27,8 @@ class VariationalAutoencoder(nn.Module):
         encoder_layers: List[nn.Module] = [
             nn.Linear(input_size, input_size),
             nn.ReLU(),
+            nn.Linear(input_size, input_size),
+            nn.ReLU(),
             # Output mu and log(sigma^2) of the latent code.
             # log(sigma^2) is used instead of sigma^2 to avoid possible numerical issues with small values.
             nn.Linear(input_size, code_size * 2),
@@ -39,6 +41,8 @@ class VariationalAutoencoder(nn.Module):
             nn.Linear(code_size, input_size),
             nn.ReLU(),
             nn.Linear(input_size, input_size),
+            nn.ReLU(),
+            nn.Linear(input_size, input_size),
             # Pixel outputs must be in the range [0, 1].
             nn.Sigmoid(),
         ]
@@ -49,21 +53,21 @@ class VariationalAutoencoder(nn.Module):
         Forward pass of the VAE model.
 
         :param x: Input tensor of shape (batch_size, input_size)
-        :return: Output, mu, sigma
+        :return: mu_x, mu_z, sigma_z
         """
 
         # Encode the input data x into the mean and log of the variance of the latent code.
-        mu, log_variance = self.encoder(x).chunk(2, dim=1)
+        mu_z, log_variance_z = self.encoder(x).chunk(2, dim=1)
 
         # log(sigma^2) / 2 = log(sigma), sigma = exp(log(sigma))
-        sigma = torch.exp(0.5 * log_variance)
+        sigma = torch.exp(0.5 * log_variance_z)
         epsilon = torch.randn_like(sigma)
 
         # z|x ~ N(mu, sigma^2)
-        z = mu + epsilon * sigma
+        z = mu_z + epsilon * sigma
 
-        x_prime = self.decoder(z)
+        mu_x = self.decoder(z)
 
-        return x_prime, mu, sigma
+        return mu_x, mu_z, sigma
 
 

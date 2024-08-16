@@ -65,7 +65,7 @@ def main() -> None:
     vae.train()
     vae.to(device)
 
-    optimizer = optim.Adam(vae.parameters(), lr=1e-3)
+    optimizer = optim.Adam(vae.parameters(), lr=learning_rate)
 
     for epoch in range(num_epochs):
         print(f"Epoch {epoch}")
