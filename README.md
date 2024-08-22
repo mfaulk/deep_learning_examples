@@ -42,8 +42,8 @@ curl -sSL https://install.python-poetry.org | python3 -
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/pytorch_examples.git
-cd pytorch_examples
+git clone https://github.com/yourusername/deep_learning_examples.git
+cd deep_learning_examples
 ```
 
 ### Install Dependencies
@@ -60,11 +60,34 @@ To train the MNIST autoencoder, run the following command:
 poetry run python -m examples.mnist_autoencoder
 ```
 
-## Contributing
+## Notebooks
+To start Jupyter and run a notebook, use the following command:
 
-Contributions are welcome! Please fork the repository and submit pull requests for any enhancements or bug fixes.
+```bash
+poetry run jupyter notebook --notebook-dir ./notebooks
+```
 
-## License
+## Testing
+To run the tests with coverage (and, optionally, with mypy) use:
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+```bash
+poetry run pytest
+poetry run pytest --mypy
+```
+
+## MyPy Type Checking
+MyPy is a static type checker for Python that helps developers ensure their code is type-safe.
+By analyzing type annotations in your code, MyPy can catch potential type errors before runtime
+```bash
+poetry run mypy src tests
+```  
+
+## Linting with Ruff
+
+Checks the codebase (minus notebooks) for linting issues. Add `--fix` to automatically fix some issues.
+
+```bash
+poetry run ruff check src tests
+poetry run ruff check src tests --fix
+```
 
