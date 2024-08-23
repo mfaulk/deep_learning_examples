@@ -1,20 +1,28 @@
-# PyTorch Examples
+# Deep Learning Examples
 
-A collection of neural network examples using PyTorch.
+A Deep Learning Quickstart using PyTorch.
 
 ## Examples
 
 1. [MNIST Autoencoder](src/mnist_autoencoder): A simple autoencoder network for the MNIST dataset.
+2. MNIST VAE: A variational autoencoder network for the MNIST dataset.
 
-## Setup Instructions
+## Tools
 
-### Prerequisites
+This project template configures tools for code quality, testing, and documentation:
 
-- Python 3.8 or higher
-- CUDA
-- Poetry (for dependency management)
+- **[Poetry](https://python-poetry.org/)**: Manages dependencies and virtual environments for consistent builds and setup
+- **[PyTorch](https://pytorch.org/)**: The core deep learning library
+- **[mypy](http://mypy-lang.org/)**: Static type checking
+- **[Ruff](https://beta.ruff.rs/)**: Fast and comprehensive linter
+- **[pytest](https://pytest.org/)**: Flexible framework for unit testing
+- **[Coverage.py](https://coverage.readthedocs.io/)**: Measures code coverage
+- **[Jupyter Notebook](https://jupyter.org/)**: Interactive development for experimenting and prototyping
 
-## CUDA Project Requirements
+
+## Setup
+
+### CUDA: GPU Support
 
 1. **CUDA-Compatible GPU**: Check the [CUDA-enabled products](https://developer.nvidia.com/cuda-gpus) list to see if
    your GPU
@@ -31,19 +39,12 @@ A collection of neural network examples using PyTorch.
 1. **cuDNN Library**: GPU-accelerated primitives for deep neural networks. Download and install
    the [cuDNN library](https://developer.nvidia.com/cudnn).
 
-### Installing Poetry
+### Poetry: Dependency Management
 
 If you haven't installed Poetry yet, you can do so by following the instructions below:
 
 ```bash
 curl -sSL https://install.python-poetry.org | python3 -
-```
-
-### Clone the Repository
-
-```bash
-git clone https://github.com/yourusername/deep_learning_examples.git
-cd deep_learning_examples
 ```
 
 ### Install Dependencies
@@ -60,7 +61,7 @@ To train the MNIST autoencoder, run the following command:
 poetry run python -m examples.mnist_autoencoder
 ```
 
-## Notebooks
+## Jupyter Notebooks
 To start Jupyter and run a notebook, use the following command:
 
 ```bash
@@ -75,14 +76,14 @@ poetry run pytest
 poetry run pytest --mypy
 ```
 
-## MyPy Type Checking
+## MyPy
 MyPy is a static type checker for Python that helps developers ensure their code is type-safe.
 By analyzing type annotations in your code, MyPy can catch potential type errors before runtime
 ```bash
 poetry run mypy src tests
 ```  
 
-## Linting with Ruff
+## Ruff
 
 Checks the codebase (minus notebooks) for linting issues. Add `--fix` to automatically fix some issues.
 
