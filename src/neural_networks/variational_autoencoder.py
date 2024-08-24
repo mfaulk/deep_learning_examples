@@ -62,6 +62,7 @@ class VariationalAutoencoder(nn.Module):
         # z|x ~ N(mu, sigma^2)
         z = mu_z + epsilon * sigma
 
+        # Decode the latent code z into the mean of the output data.
         mu_x = self.decoder(z)
 
         return mu_x, mu_z, sigma
