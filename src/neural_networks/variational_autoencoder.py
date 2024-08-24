@@ -27,9 +27,7 @@ class VariationalAutoencoder(nn.Module):
         encoder_layers: List[nn.Module] = [
             nn.Linear(input_size, input_size),
             nn.ReLU(),
-            nn.Linear(input_size, input_size),
-            nn.ReLU(),
-            # Output mu and log(sigma^2) of the latent code.
+            # Outputs: mu and log(sigma^2) of the latent code.
             # log(sigma^2) is used instead of sigma^2 to avoid possible numerical issues with small values.
             nn.Linear(input_size, code_size * 2),
         ]
@@ -39,8 +37,6 @@ class VariationalAutoencoder(nn.Module):
         # Decoder computes the mean of the output data.
         decoder_layers: List[nn.Module] = [
             nn.Linear(code_size, input_size),
-            nn.ReLU(),
-            nn.Linear(input_size, input_size),
             nn.ReLU(),
             nn.Linear(input_size, input_size),
             # Pixel outputs must be in the range [0, 1].
@@ -69,3 +65,4 @@ class VariationalAutoencoder(nn.Module):
         mu_x = self.decoder(z)
 
         return mu_x, mu_z, sigma
+

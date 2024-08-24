@@ -4,11 +4,14 @@ Train a Variational Autoencoder (VAE) on the MNIST dataset.
 This example follows the VAE paper by Kingma and Welling, Auto-Encoding Variational Bayes, ICLR, 2014.
 """
 
+import matplotlib.pyplot as plt
 import torch
 from torch import nn, optim, Tensor
 from torchvision import transforms as transforms
+from torchinfo import summary
 
 from datasets.mnist import mnist
+from examples.mnist_autoencoder import display_reconstructions
 from neural_networks.variational_autoencoder import VariationalAutoencoder
 from utils.cuda import print_cuda_configuration
 from utils.seeds import set_seeds
@@ -57,7 +60,7 @@ def main() -> None:
     batch_size = 100
 
     # Number of passes over the training data.
-    num_epochs = 5
+    num_epochs = 200
 
     # Learning rate for the optimizer.
     learning_rate = 1e-3
@@ -65,8 +68,7 @@ def main() -> None:
     # === Data ===
     transform = transforms.Compose(
         [
-            transforms.ToTensor(),
-            transforms.Normalize((0.5,), (0.5,)),
+            transforms.ToTensor(), # Converts pixel values in the range [0, 255] to [0, 1].
             torch.flatten,
         ]
     )
@@ -74,6 +76,7 @@ def main() -> None:
     image_size = 784  # 28 * 28 pixels.
 
     vae = VariationalAutoencoder(image_size, 150).to(device)
+    summary(vae, input_size=(batch_size, image_size))
     vae.train()
     vae.to(device)
 
@@ -99,6 +102,21 @@ def main() -> None:
         print(f"  Average Training Loss: {avg_train_loss:.4f}")
 
     print("Training complete.")
+
+    # === Testing ===
+
+    test_data_iter = iter(test_loader)
+    test_images, _labels = next(test_data_iter)
+    test_images = test_images.cuda()
+
+    (reconstructed, _, _) = vae.forward(test_images)
+    test_images = test_images.cpu()
+    reconstructed = reconstructed.cpu()
+
+    # Compare inputs and reconstructed images.
+    display_reconstructions(test_images, reconstructed)
+
+    plt.show()
 
 
 if __name__ == "__main__":
