@@ -77,9 +77,11 @@ def main() -> None:
 
     vae = VariationalAutoencoder(image_size, 150).to(device)
     summary(vae, input_size=(batch_size, image_size))
+
+    # === Training ===
+
     vae.train()
     vae.to(device)
-
     optimizer = optim.Adam(vae.parameters(), lr=learning_rate)
 
     for epoch in range(num_epochs):
@@ -91,7 +93,7 @@ def main() -> None:
             # Forward pass
             outputs, mu, sigma = vae(images)
             loss = vae_loss(images, outputs, mu, sigma)
-            epoch_loss += loss.item()
+            epoch_loss += loss.item() * batch_size
 
             # Backward pass and parameter updates
             optimizer.zero_grad()
