@@ -22,7 +22,7 @@ class CNN(nn.Module):
     def __init__(self) -> None:
         super(CNN, self).__init__()
 
-        layers: List[nn.Module] = [
+        self.network = nn.Sequential(
             # Convolutional Layers
             nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding=1),
             nn.ReLU(),
@@ -35,10 +35,8 @@ class CNN(nn.Module):
             nn.Linear(in_features=64 * 7 * 7, out_features=128),
             nn.ReLU(),
             nn.Dropout(0.25),
-            nn.Linear(in_features=128, out_features=10),
-            # nn.Softmax(1),
-        ]
-        self.network = nn.Sequential(*layers)
+            nn.Linear(in_features=128, out_features=10)
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Defines the forward pass of the CNN.
