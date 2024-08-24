@@ -5,15 +5,16 @@ This example follows the VAE paper by Kingma and Welling, Auto-Encoding Variatio
 """
 
 import torch
-from torch import nn, optim
+from torch import nn, optim, Tensor
+from torchvision import transforms as transforms
 
-from datasets.mnist import get_mnist_data
+from datasets.mnist import mnist
 from neural_networks.variational_autoencoder import VariationalAutoencoder
 from utils.cuda import print_cuda_configuration
 from utils.seeds import set_seeds
 
 
-def loss_function(
+def vae_loss(
     x: torch.Tensor, x_prime: torch.Tensor, mu: torch.Tensor, log_variance: torch.Tensor
 ) -> torch.Tensor:
     """
@@ -28,9 +29,8 @@ def loss_function(
         || |_
     """
     # Reconstruction loss.
-    reconstruction_loss = nn.functional.binary_cross_entropy(
-        x_prime, x, reduction="sum"
-    )
+    ce_loss = nn.CrossEntropyLoss()
+    reconstruction_loss: Tensor = ce_loss(x_prime, x)
 
     # KL Divergence
     # Appendix B of Kingma and Welling gives an analytical solution for the KL divergence when
@@ -38,7 +38,7 @@ def loss_function(
     # 2. The approximate posterior distribution q_{\phi}(z|x) is Gaussian.
 
     # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
-    kl_divergence = -0.5 * torch.sum(1 + log_variance - mu.pow(2) - log_variance.exp())
+    kl_divergence: Tensor = -0.5 * torch.sum(1 + log_variance - mu.pow(2) - log_variance.exp())
 
     return reconstruction_loss + kl_divergence
 
@@ -63,7 +63,14 @@ def main() -> None:
     learning_rate = 1e-3
 
     # === Data ===
-    train_loader, test_loader = get_mnist_data(data_path, batch_size)
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.5,), (0.5,)),
+            torch.flatten,
+        ]
+    )
+    train_loader, test_loader = mnist(data_path, batch_size, transform)
     image_size = 784  # 28 * 28 pixels.
 
     vae = VariationalAutoencoder(image_size, 150).to(device)
@@ -73,17 +80,23 @@ def main() -> None:
     optimizer = optim.Adam(vae.parameters(), lr=learning_rate)
 
     for epoch in range(num_epochs):
-        print(f"Epoch {epoch}")
+        print(f"Epoch [{epoch + 1}/{num_epochs}]")
+        epoch_loss = 0.0
         for images, _labels in train_loader:
             images = images.to(device)
 
             # Forward pass
             outputs, mu, sigma = vae(images)
-            loss = loss_function(images, outputs, mu, sigma)
-            loss.backward()
+            loss = vae_loss(images, outputs, mu, sigma)
+            epoch_loss += loss.item()
 
+            # Backward pass and parameter updates
             optimizer.zero_grad()
+            loss.backward()
             optimizer.step()
+
+        avg_train_loss = epoch_loss / float(len(train_loader.dataset))
+        print(f"  Average Training Loss: {avg_train_loss:.4f}")
 
     print("Training complete.")
 

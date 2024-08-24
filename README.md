@@ -8,6 +8,7 @@ Deep Learning Examples with PyTorch.
 2. [MNIST Autoencoder](src/examples/mnist_autoencoder.py): Autoencoder,
 3. [MNIST Autoencoder Cross Validation](src/examples/mnist_autoencoder_cross_validation.py): Model selection via cross-validation,
 2. [MNIST Convolutional NN](src/examples/mnist_classifier.py): Convolutional neural network for the MNIST dataset,
+3. [MNIST VAE](src/examples/mnist_vae.py): Variational Autoencoder,
 
 ## Tools
 
