@@ -13,7 +13,9 @@ from utils.cuda import print_cuda_configuration
 from utils.seeds import set_seeds
 
 
-def loss_function(x: torch.Tensor, x_prime: torch.Tensor, mu: torch.Tensor, log_variance: torch.Tensor) -> torch.Tensor:
+def loss_function(
+    x: torch.Tensor, x_prime: torch.Tensor, mu: torch.Tensor, log_variance: torch.Tensor
+) -> torch.Tensor:
     """
     Loss function for the Variational Autoencoder (VAE), assuming a Gaussian prior and approximate posterior.
 
@@ -26,7 +28,9 @@ def loss_function(x: torch.Tensor, x_prime: torch.Tensor, mu: torch.Tensor, log_
         || |_
     """
     # Reconstruction loss.
-    reconstruction_loss = nn.functional.binary_cross_entropy(x_prime, x, reduction='sum')
+    reconstruction_loss = nn.functional.binary_cross_entropy(
+        x_prime, x, reduction="sum"
+    )
 
     # KL Divergence
     # Appendix B of Kingma and Welling gives an analytical solution for the KL divergence when
@@ -38,6 +42,7 @@ def loss_function(x: torch.Tensor, x_prime: torch.Tensor, mu: torch.Tensor, log_
 
     return reconstruction_loss + kl_divergence
 
+
 def main() -> None:
     set_seeds()
     print_cuda_configuration()
@@ -46,7 +51,7 @@ def main() -> None:
     # === Configuration ===
 
     # Path to the directory where downloaded data is stored.
-    data_path = './data'
+    data_path = "./data"
 
     # Training batch size.
     batch_size = 100

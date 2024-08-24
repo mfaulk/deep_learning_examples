@@ -69,5 +69,3 @@ class VariationalAutoencoder(nn.Module):
         mu_x = self.decoder(z)
 
         return mu_x, mu_z, sigma
-
-

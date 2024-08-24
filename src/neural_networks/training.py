@@ -28,7 +28,7 @@ def train_autoencoder(
     per_batch_loss: List[float] = []
 
     # === Training ===
-    model.train() # Set the model to training mode.
+    model.train()  # Set the model to training mode.
     for epoch in range(num_epochs):
         # Average batch training loss in this epoch.
         # TODO: avg loss per sample would be clearer.
@@ -60,12 +60,13 @@ def train_autoencoder(
 
     return per_batch_loss
 
+
 def train_variational_autoencoder(
-        model: nn.Module,
-        device: torch.device,
-        train_loader: DataLoader,
-        optimizer: torch.optim.Optimizer,
-        num_epochs: int
+    model: nn.Module,
+    device: torch.device,
+    train_loader: DataLoader,
+    optimizer: torch.optim.Optimizer,
+    num_epochs: int,
 ) -> List[float]:
     """
     Train a variational autoencoder model.
@@ -82,25 +83,25 @@ def train_variational_autoencoder(
     per_batch_loss: List[float] = []
 
     # === Training ===
-    model.train() # Set the model to training mode.
+    model.train()  # Set the model to training mode.
     for epoch in range(num_epochs):
-            # Average batch training loss in this epoch.
-            epoch_avg_batch_loss = 0.0
+        # Average batch training loss in this epoch.
+        epoch_avg_batch_loss = 0.0
 
-            # Iterate over training batches.
-            for inputs, _labels in train_loader:
-                inputs = inputs.to(device)
+        # Iterate over training batches.
+        for inputs, _labels in train_loader:
+            inputs = inputs.to(device)
 
-                # Forward pass
-                outputs, _code = model(inputs)
-                loss = nn.MSELoss()
-                loss = loss(outputs, inputs)
-                epoch_avg_batch_loss += loss.item()
-                per_batch_loss.append(loss.item())
+            # Forward pass
+            outputs, _code = model(inputs)
+            loss = nn.MSELoss()
+            loss = loss(outputs, inputs)
+            epoch_avg_batch_loss += loss.item()
+            per_batch_loss.append(loss.item())
 
-                # Backward pass and parameter updates
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
+            # Backward pass and parameter updates
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
     return per_batch_loss
