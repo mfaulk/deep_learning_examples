@@ -2,8 +2,9 @@
 
 import torch
 from torch import nn
+from torchvision import transforms as transforms
 
-from datasets.mnist import get_mnist_data
+from datasets.mnist import mnist
 from model_selection.configuration_space import generate_configurations
 from model_selection.cross_validation import k_fold_cross_validation
 from neural_networks.symmetric_autoencoder import SymmetricAutoencoder
@@ -34,7 +35,12 @@ def main() -> None:
     k_folds = 3
 
     # === Data ===
-    train_loader, test_loader = get_mnist_data(data_path, batch_size)
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,)),
+        torch.flatten,
+    ])
+    train_loader, test_loader = mnist(data_path, batch_size, transform)
     image_size = 784 # 28 * 28 pixels.
 
     # === Training ===

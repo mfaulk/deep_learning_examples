@@ -1,4 +1,3 @@
-# Train an autoencoder on the MNIST dataset.
 
 from typing import List
 
@@ -7,10 +6,9 @@ import torch
 from torch import Tensor, optim
 from torch import nn
 from torchinfo import summary
+from torchvision import transforms as transforms
 
-from datasets.mnist import get_mnist_data
-from model_selection.configuration_space import generate_configurations
-from model_selection.cross_validation import k_fold_cross_validation
+from datasets.mnist import mnist
 from neural_networks.evaluating import evaluate_autoencoder
 from neural_networks.symmetric_autoencoder import SymmetricAutoencoder
 from neural_networks.training import train_autoencoder
@@ -53,11 +51,13 @@ def main() -> None:
     # Learning rate for the optimizer.
     learning_rate = 1e-3
 
-    # Number of folds for k-fold cross-validation.
-    k_folds = 3
-
     # === Data ===
-    train_loader, test_loader = get_mnist_data(data_path, batch_size)
+    transform = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,), (0.5,)),
+        torch.flatten,
+    ])
+    train_loader, test_loader = mnist(data_path, batch_size, transform)
     image_size = 784  # 28 * 28 pixels.
 
     # === Training ===
