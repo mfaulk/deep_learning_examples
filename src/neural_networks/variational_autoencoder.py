@@ -23,6 +23,8 @@ class VariationalAutoencoder(nn.Module):
         """
         super(VariationalAutoencoder, self).__init__()
 
+        self.code_size = code_size
+
         # Encoder computes the mean and log of the variance of the latent code.
         encoder_layers: List[nn.Module] = [
             nn.Linear(input_size, input_size),
@@ -40,7 +42,8 @@ class VariationalAutoencoder(nn.Module):
             nn.ReLU(),
             nn.Linear(input_size, input_size),
             # Pixel outputs must be in the range [0, 1].
-            nn.Sigmoid(),
+            # nn.Sigmoid(),
+            nn.Tanh(),
         ]
         self.decoder = nn.Sequential(*decoder_layers)
 
@@ -67,3 +70,14 @@ class VariationalAutoencoder(nn.Module):
 
         return mu_x, mu_z, sigma
 
+    def sample(self, num_samples: int, device) -> Tensor:
+        """
+        Generate samples from the VAE model.
+
+        :param num_samples: Number of samples to generate.
+        :return: Generated samples.
+        """
+        z = torch.randn(num_samples, self.code_size)
+        z = z.to(device)
+        samples: Tensor = self.decoder(z)
+        return samples

@@ -118,6 +118,21 @@ def main() -> None:
     # Compare inputs and reconstructed images.
     display_reconstructions(test_images, reconstructed)
 
+    # === Generate samples ===
+    num_samples = 100
+    samples = vae.sample(num_samples, device).cpu().detach()
+    samples = samples.view(num_samples, 28, 28)
+
+    num_row = 10
+    num_col = 10
+
+    fig, axes = plt.subplots(num_row, num_col, figsize=(2 * num_col, 2 * num_row))
+    for i in range(num_samples):
+        ax = axes[i // num_col, i % num_col]
+        ax.imshow(samples[i], cmap='gray')
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+    plt.tight_layout()
     plt.show()
 
 
