@@ -2,7 +2,9 @@ import itertools
 from typing import List, Tuple
 
 
-def generate_configurations(min_depth: int, max_depth: int, widths: List[int]) -> List[List[int]]:
+def generate_configurations(
+    min_depth: int, max_depth: int, widths: List[int]
+) -> List[List[int]]:
     """
     Generate all possible neural network configurations given a range of depths and widths.
 

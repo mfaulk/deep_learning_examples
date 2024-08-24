@@ -7,11 +7,11 @@ from torch.utils.data import DataLoader
 
 
 def train_autoencoder(
-        model: nn.Module,
-        device: torch.device,
-        train_loader: DataLoader,
-        optimizer: torch.optim.Optimizer,
-        num_epochs: int
+    model: nn.Module,
+    device: torch.device,
+    train_loader: DataLoader,
+    optimizer: torch.optim.Optimizer,
+    num_epochs: int,
 ) -> List[float]:
     """
     Train the autoencoder model.
@@ -29,7 +29,6 @@ def train_autoencoder(
     # === Training ===
     model.train()
     for epoch in range(num_epochs):
-
         # Average batch training loss in this epoch.
         # TODO: avg loss per sample would be clearer.
         epoch_avg_batch_loss = 0.0
@@ -55,6 +54,7 @@ def train_autoencoder(
         num_batches = len(train_loader)
         epoch_avg_batch_loss /= num_batches
         print(
-            f'  Epoch [{epoch + 1}/{num_epochs}], Average Training Loss per Batch: {epoch_avg_batch_loss:.4f}, Time: {elapsed_time:.2f} seconds')
+            f"  Epoch [{epoch + 1}/{num_epochs}], Average Training Loss per Batch: {epoch_avg_batch_loss:.4f}, Time: {elapsed_time:.2f} seconds"
+        )
 
     return per_batch_loss

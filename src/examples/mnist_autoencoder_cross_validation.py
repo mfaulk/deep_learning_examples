@@ -20,7 +20,7 @@ def main() -> None:
     # === Configuration ===
 
     # Path to the directory where downloaded data is stored.
-    data_path = './data'
+    data_path = "./data"
 
     # Training batch size.
     batch_size = 100
@@ -35,13 +35,15 @@ def main() -> None:
     k_folds = 3
 
     # === Data ===
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,)),
-        torch.flatten,
-    ])
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.5,), (0.5,)),
+            torch.flatten,
+        ]
+    )
     train_loader, test_loader = mnist(data_path, batch_size, transform)
-    image_size = 784 # 28 * 28 pixels.
+    image_size = 784  # 28 * 28 pixels.
 
     # === Training ===
     criterion: nn.MSELoss = nn.MSELoss()
@@ -58,28 +60,37 @@ def main() -> None:
     # Retain only configurations with final layer of size 150.
     all_configurations = [config for config in all_configurations if config[-1] == 150]
 
-    min_cost = float('inf')
+    min_cost = float("inf")
     best_configuration = all_configurations[0]
 
     for configuration in all_configurations:
         # The first layer size is the image size.
         configuration = [image_size] + configuration
-        print(f'Trying configuration: {configuration}')
+        print(f"Trying configuration: {configuration}")
 
         def model_factory() -> SymmetricAutoencoder:
             return SymmetricAutoencoder(configuration)
 
         loss_per_folding = k_fold_cross_validation(
-            k_folds, train_loader.dataset, model_factory, device, criterion, batch_size, learning_rate, num_epochs)
+            k_folds,
+            train_loader.dataset,
+            model_factory,
+            device,
+            criterion,
+            batch_size,
+            learning_rate,
+            num_epochs,
+        )
         avg_loss = sum(loss_per_folding) / k_folds
-        print(f'Average cross validation loss: {avg_loss}')
+        print(f"Average cross validation loss: {avg_loss}")
         if avg_loss < min_cost:
             min_cost = avg_loss
             best_configuration = configuration
 
-    print(f'Best configuration: {best_configuration}\nAverage loss: {min_cost}')
+    print(f"Best configuration: {best_configuration}\nAverage loss: {min_cost}")
 
     # TODO: plot the loss for each configuration.
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

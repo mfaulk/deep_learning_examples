@@ -1,4 +1,3 @@
-
 from typing import List
 
 import matplotlib.pyplot as plt
@@ -16,7 +15,9 @@ from src.utils.cuda import print_cuda_configuration
 from src.utils.seeds import set_seeds
 
 
-def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display: int = 5) -> None:
+def display_reconstructions(
+    original: Tensor, reconstructed: Tensor, num_display: int = 5
+) -> None:
     """
     Display the original and reconstructed images.
     :param original: Original images.
@@ -24,10 +25,12 @@ def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display
     :param num_display: Number of original-reconstructed image pairs to display.
     :return:
     """
-    fig, axes = plt.subplots(nrows=2, ncols=num_display, sharex=True, sharey=True, figsize=(20, 4))
+    fig, axes = plt.subplots(
+        nrows=2, ncols=num_display, sharex=True, sharey=True, figsize=(20, 4)
+    )
     for images, row in zip([original, reconstructed], axes):
         for img, ax in zip(images, row):
-            ax.imshow(img.view(28, 28).detach().numpy(), cmap='gray')
+            ax.imshow(img.view(28, 28).detach().numpy(), cmap="gray")
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
 
@@ -40,7 +43,7 @@ def main() -> None:
     # === Configuration ===
 
     # Path to the directory where downloaded data is stored.
-    data_path = './data'
+    data_path = "./data"
 
     # Training batch size.
     batch_size = 100
@@ -52,11 +55,13 @@ def main() -> None:
     learning_rate = 1e-3
 
     # === Data ===
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize((0.5,), (0.5,)),
-        torch.flatten,
-    ])
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.5,), (0.5,)),
+            torch.flatten,
+        ]
+    )
     train_loader, test_loader = mnist(data_path, batch_size, transform)
     image_size = 784  # 28 * 28 pixels.
 
@@ -66,12 +71,14 @@ def main() -> None:
     model: SymmetricAutoencoder = SymmetricAutoencoder(layers).cuda()
     summary(model, input_size=(batch_size, image_size))
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    per_batch_loss: List[float] = train_autoencoder(model, device, train_loader, optimizer, num_epochs)
+    per_batch_loss: List[float] = train_autoencoder(
+        model, device, train_loader, optimizer, num_epochs
+    )
 
     # === Testing ===
 
     avg_test_loss = evaluate_autoencoder(model, device, test_loader, criterion)
-    print(f'\nAverage Testing Loss: {avg_test_loss:.4f}')
+    print(f"\nAverage Testing Loss: {avg_test_loss:.4f}")
 
     # === Visualizations ===
 
@@ -86,9 +93,9 @@ def main() -> None:
     # Plot the per-batch training loss.
     plt.figure(1)
     plt.plot(per_batch_loss)
-    plt.xlabel('Batch')
-    plt.ylabel('Loss')
-    plt.title('Per-batch Training Loss')
+    plt.xlabel("Batch")
+    plt.ylabel("Loss")
+    plt.title("Per-batch Training Loss")
 
     # Compare inputs and reconstructed images.
     display_reconstructions(test_images, reconstructed)
@@ -96,5 +103,5 @@ def main() -> None:
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

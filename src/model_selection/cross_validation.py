@@ -11,14 +11,15 @@ from neural_networks.training import train_autoencoder
 
 
 def k_fold_cross_validation(
-        k: int,
-        dataset: Dataset,
-        model_factory: Callable[[], SymmetricAutoencoder],
-        device: torch.device,
-        criterion: nn.Module,
-        batch_size: int,
-        learning_rate: float,
-        num_epochs: int) -> List[float]:
+    k: int,
+    dataset: Dataset,
+    model_factory: Callable[[], SymmetricAutoencoder],
+    device: torch.device,
+    criterion: nn.Module,
+    batch_size: int,
+    learning_rate: float,
+    num_epochs: int,
+) -> List[float]:
     """
     Perform k-fold cross-validation.
     :param k: Number of folds.
@@ -38,13 +39,17 @@ def k_fold_cross_validation(
     validation_losses = []
 
     for fold, (train_indices, val_indices) in enumerate(kfold.split(dataset)):
-        print(f'Fold {fold}')
+        print(f"Fold {fold}")
 
         train_subset = Subset(dataset, train_indices)
         validation_subset = Subset(dataset, val_indices)
 
-        train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True, num_workers=4)
-        validation_loader = DataLoader(validation_subset, batch_size=batch_size, shuffle=False, num_workers=4)
+        train_loader = DataLoader(
+            train_subset, batch_size=batch_size, shuffle=True, num_workers=4
+        )
+        validation_loader = DataLoader(
+            validation_subset, batch_size=batch_size, shuffle=False, num_workers=4
+        )
 
         model = model_factory().to(device)
         optimizer = optim.Adam(model.parameters(), lr=learning_rate)

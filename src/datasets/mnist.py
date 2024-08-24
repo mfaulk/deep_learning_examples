@@ -7,7 +7,10 @@ from torchvision import transforms as transforms
 from torchvision.datasets import MNIST
 from typing import Callable, Optional
 
-def mnist(data_dir: str, batch_size: int, transform: Optional[Callable] = None) -> Tuple[DataLoader, DataLoader]:
+
+def mnist(
+    data_dir: str, batch_size: int, transform: Optional[Callable] = None
+) -> Tuple[DataLoader, DataLoader]:
     """
     Get MNIST Training and Testing data sets.
     Args:
@@ -20,15 +23,19 @@ def mnist(data_dir: str, batch_size: int, transform: Optional[Callable] = None) 
     """
 
     if transform is None:
-        transform = transforms.Compose([
-            transforms.ToTensor()
-        ])
+        transform = transforms.Compose([transforms.ToTensor()])
 
     training_set = MNIST(root=data_dir, train=True, download=True, transform=transform)
-    train_loader = DataLoader(training_set, batch_size=batch_size, shuffle=True, num_workers=4)
+    train_loader = DataLoader(
+        training_set, batch_size=batch_size, shuffle=True, num_workers=4
+    )
 
-    test_set = torchvision.datasets.MNIST(root=data_dir, train=False, download=True, transform=transform)
-    test_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=4)
+    test_set = torchvision.datasets.MNIST(
+        root=data_dir, train=False, download=True, transform=transform
+    )
+    test_loader = torch.utils.data.DataLoader(
+        test_set, batch_size=batch_size, shuffle=False, num_workers=4
+    )
 
     return train_loader, test_loader
 

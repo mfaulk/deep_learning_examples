@@ -5,7 +5,6 @@ from model_selection.configuration_space import generate_configurations
 
 
 class TestGenerateConfigurations(unittest.TestCase):
-
     def test_generate_configurations_depth_0(self) -> None:
         min_depth = 0
         max_depth = 0
@@ -56,9 +55,6 @@ class TestGenerateConfigurations(unittest.TestCase):
         max_depth = 2
         widths = [10, 20]
 
-        expected_configurations = [
-            [10], [20],
-            [10, 10], [10, 20], [20, 10], [20, 20]
-        ]
+        expected_configurations = [[10], [20], [10, 10], [10, 20], [20, 10], [20, 20]]
         configurations = generate_configurations(min_depth, max_depth, widths)
         self.assertEqual(len(configurations), len(expected_configurations))

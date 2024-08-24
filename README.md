@@ -92,3 +92,8 @@ poetry run ruff check src tests
 poetry run ruff check src tests --fix
 ```
 
+Formatting
+
+```bash
+poetry run ruff format src tests
+```

@@ -4,10 +4,7 @@ from torch.utils.data import DataLoader
 
 
 def evaluate_autoencoder(
-        model: nn.Module,
-        device: torch.device,
-        val_loader: DataLoader,
-        criterion: nn.Module
+    model: nn.Module, device: torch.device, val_loader: DataLoader, criterion: nn.Module
 ) -> float:
     """
     Evaluate the reconstruction loss on validation data.

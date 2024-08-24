@@ -10,7 +10,9 @@ from utils.cuda import print_cuda_configuration
 from utils.seeds import set_seeds
 
 
-def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display: int = 10) -> None:
+def display_reconstructions(
+    original: Tensor, reconstructed: Tensor, num_display: int = 10
+) -> None:
     """
     Display the original and reconstructed images.
     :param original: Original images.
@@ -18,7 +20,9 @@ def display_reconstructions(original: Tensor, reconstructed: Tensor, num_display
     :param num_display: Number of original-reconstructed image pairs to display.
     :return:
     """
-    fig, axes = plt.subplots(nrows=2, ncols=num_display, sharex=True, sharey=True, figsize=(20, 4))
+    fig, axes = plt.subplots(
+        nrows=2, ncols=num_display, sharex=True, sharey=True, figsize=(20, 4)
+    )
     for images, row in zip([original, reconstructed], axes):
         for img, ax in zip(images, row):
             ax.imshow(img.view(218, 178, 3).detach().numpy())
@@ -32,7 +36,7 @@ def main() -> None:
 
     print_cuda_configuration()
 
-    celeba_path = '/home/mfaulk/data/celeba/CelebA/Img/img_align_celeba'
+    celeba_path = "/home/mfaulk/data/celeba/CelebA/Img/img_align_celeba"
 
     batch_size = 200
 
@@ -71,14 +75,16 @@ def main() -> None:
             optimizer.step()
 
         elapsed_time = time.time() - start_time
-        print(f'Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}, Time: {elapsed_time:.2f} seconds')
+        print(
+            f"Epoch [{epoch + 1}/{num_epochs}], Loss: {loss.item():.4f}, Time: {elapsed_time:.2f} seconds"
+        )
 
     # Monitor the per-batch training loss.
     plt.figure(1)
     plt.plot(per_batch_loss)
-    plt.xlabel('Batch')
-    plt.ylabel('Loss')
-    plt.title('Per-batch Training Loss')
+    plt.xlabel("Batch")
+    plt.ylabel("Loss")
+    plt.title("Per-batch Training Loss")
 
     # Testing
     test_data_iter = iter(test_loader)
@@ -94,5 +100,5 @@ def main() -> None:
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

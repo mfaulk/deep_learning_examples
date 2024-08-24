@@ -14,24 +14,31 @@ def load_celeba(path: str, batch_size: int) -> Tuple[DataLoader, DataLoader]:
     :return: (train_loader, test_loader)
     """
 
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.5, 0.5, 0.5],
-                             std=[0.5, 0.5, 0.5]),
-        torch.flatten
-    ])
+    transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+            torch.flatten,
+        ]
+    )
 
     # Load the full dataset
     full_dataset: ImageFolder = ImageFolder(root=path, transform=transform)
-    
+
     # Split the dataset into training and testing sets
     train = 0.8
     test = 0.2
     train_dataset, test_dataset = random_split(full_dataset, [train, test])
-    print(f"Split CelebA dataset into {len(train_dataset):_} training and {len(test_dataset):_} testing examples.")
+    print(
+        f"Split CelebA dataset into {len(train_dataset):_} training and {len(test_dataset):_} testing examples."
+    )
 
     # Create DataLoaders
-    training_dataloader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=6)
-    testing_dataloader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=6)
+    training_dataloader = DataLoader(
+        train_dataset, batch_size=batch_size, shuffle=True, num_workers=6
+    )
+    testing_dataloader = DataLoader(
+        test_dataset, batch_size=batch_size, shuffle=False, num_workers=6
+    )
 
     return training_dataloader, testing_dataloader
