@@ -1,15 +1,17 @@
 # Deep Learning Examples
 
-A Deep Learning Quickstart using PyTorch.
+Deep Learning Examples with PyTorch.
 
 ## Examples
 
-1. [MNIST Autoencoder](src/mnist_autoencoder): A simple autoencoder network for the MNIST dataset.
-2. MNIST VAE: A variational autoencoder network for the MNIST dataset.
+1. [MNIST PCA](src/examples/mnist_pca.py): Principal Component Analysis of MNIST dataset,
+2. [MNIST Autoencoder](src/examples/mnist_autoencoder.py): Autoencoder,
+3. [MNIST Autoencoder Cross Validation](src/examples/mnist_autoencoder_cross_validation.py): Model selection via cross-validation,
+2. [MNIST Convolutional NN](src/examples/mnist_classifier.py): Convolutional neural network for the MNIST dataset,
 
 ## Tools
 
-This project template configures tools for code quality, testing, and documentation:
+This project uses several tools for code quality, testing, and documentation:
 
 - **[Poetry](https://python-poetry.org/)**: Manages dependencies and virtual environments for consistent builds and setup
 - **[PyTorch](https://pytorch.org/)**: The core deep learning library
@@ -18,7 +20,6 @@ This project template configures tools for code quality, testing, and documentat
 - **[pytest](https://pytest.org/)**: Flexible framework for unit testing
 - **[Coverage.py](https://coverage.readthedocs.io/)**: Measures code coverage
 - **[Jupyter Notebook](https://jupyter.org/)**: Interactive development for experimenting and prototyping
-
 
 ## Setup
 
@@ -39,23 +40,17 @@ This project template configures tools for code quality, testing, and documentat
 1. **cuDNN Library**: GPU-accelerated primitives for deep neural networks. Download and install
    the [cuDNN library](https://developer.nvidia.com/cudnn).
 
-### Poetry: Dependency Management
-
-If you haven't installed Poetry yet, you can do so by following the instructions below:
+### Install Dependencies
+Install Poetry (if you haven't already) and install the project dependencies:
 
 ```bash
 curl -sSL https://install.python-poetry.org | python3 -
-```
-
-### Install Dependencies
-
-```bash
 poetry install
 ``` 
 
 ## Usage
 
-To train the MNIST autoencoder, run the following command:
+To run an example, e.g. the MNIST Autoencoder, use a command like:
 
 ```bash
 poetry run python -m examples.mnist_autoencoder
@@ -77,8 +72,7 @@ poetry run pytest --mypy
 ```
 
 ## MyPy
-MyPy is a static type checker for Python that helps developers ensure their code is type-safe.
-By analyzing type annotations in your code, MyPy can catch potential type errors before runtime
+Static type checking with MyPy:
 ```bash
 poetry run mypy src tests
 ```  
@@ -92,7 +86,7 @@ poetry run ruff check src tests
 poetry run ruff check src tests --fix
 ```
 
-Formatting
+Format the codebase:
 
 ```bash
 poetry run ruff format src tests
