@@ -6,15 +6,12 @@ from typing import List, Tuple
 import matplotlib.pyplot as plt
 import torch
 from torch import nn, optim, Tensor
-from torch.utils.data import DataLoader
-from torchvision import transforms as transforms
 from torchvision import transforms as transforms
 from torchinfo import summary
 
 from datasets.mnist import mnist
 from examples.mnist_autoencoder import display_reconstructions
 from neural_networks.training import train_autoencoder
-from neural_networks.variational_autoencoder import VariationalAutoencoder
 from utils.assert_shape import AssertShape
 from utils.cuda import print_cuda_configuration
 from utils.seeds import set_seeds
@@ -102,34 +99,13 @@ def train() -> None:
     # Initialize the model, loss function, and optimizer
     model = ConvAutoencoder().to(device)
     summary(model, input_size=(batch_size, 1, 28, 28))
-    # criterion: nn.Module = nn.MSELoss()
     optimizer: optim.Optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-    # for epoch in range(num_epochs):
-    #     print(f"Epoch [{epoch + 1}/{num_epochs}]")
-    #     epoch_loss = 0.0
-    #     for data in train_loader:
-    #         img, _ = data
-    #         img = img.to(device)
-    #
-    #         # Forward pass
-    #         output = model(img)
-    #         loss: Tensor = criterion(output, img)
-    #         epoch_loss += loss.item() * batch_size
-    #
-    #         # Backward pass and optimization
-    #         optimizer.zero_grad()
-    #         loss.backward()
-    #         optimizer.step()
-    #
-    #     avg_train_loss = epoch_loss / float(len(train_loader.dataset))
-    #     print(f"  Average Training Loss: {avg_train_loss:.4f}")
-    #
-    # print('Training finished.')
 
     per_batch_loss: List[float] = train_autoencoder(
         model, device, train_loader, optimizer, num_epochs
     )
+    print('Training finished.')
 
     # === Testing ===
 
