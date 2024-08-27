@@ -33,18 +33,17 @@ class ConvAutoencoder(nn.Module):
             nn.ReLU(True),
             AssertShape((32, 7, 7)),
 
-            # [B, 32, 7, 7] -> [B, 64, 1, 1]
-            nn.Conv2d(32, 64, 7),
-            AssertShape((64, 1, 1)),
+            # [B, 32, 7, 7] -> [B, 12, 1, 1]
+            nn.Conv2d(32, 12, 7),
+            AssertShape((12, 1, 1)),
         )
 
         # Decoder: ConvTranspose2d layers
         self.decoder = nn.Sequential(
-            # [B, 64, 1, 1] -> [B, 32, 7, 7]
-            nn.ConvTranspose2d(64, 32, 7),
+            # [B, 12, 1, 1] -> [B, 32, 7, 7]
+            nn.ConvTranspose2d(12, 32, 7),
             nn.ReLU(True),
             AssertShape((32, 7, 7)),
-
 
             # [B, 32, 7, 7] -> [B, 16, 14, 14]
             nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1),
@@ -88,7 +87,7 @@ def train() -> None:
     batch_size = 100
 
     # Number of passes over the training data.
-    num_epochs = 10
+    num_epochs = 20
 
     # Learning rate for the optimizer.
     learning_rate = 1e-3
