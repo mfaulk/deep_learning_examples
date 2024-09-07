@@ -30,13 +30,9 @@ def vae_loss(
     :param x_prime: Reconstructed data.
     :param mu: Mean of the latent code.
     :param log_variance: Log of the variance of the latent code.
-    :return:
-        | ||
-        || |_
+    :return: Sum of binary cross-entropy loss and KL divergence loss.
     """
-    # Reconstruction loss.
-    # ce_loss = nn.CrossEntropyLoss()
-    # reconstruction_loss: Tensor = ce_loss(x_prime, x, reduction='sum')
+    # Sum of binary cross-entropy loss over all elements of the batch.
     reconstruction_loss: Tensor = F.binary_cross_entropy(x_prime, x, reduction='sum')
 
     # KL Divergence
@@ -44,6 +40,7 @@ def vae_loss(
     # 1. The prior is the standard normal distribution, i.e. p_{\theta}(z) = N(z; 0, I)
     # 2. The approximate posterior distribution q_{\phi}(z|x) is Gaussian.
 
+    # Sum of KL divergence over all elements of the batch.
     # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
     kl_divergence: Tensor = -0.5 * torch.sum(1 + log_variance - mu.pow(2) - log_variance.exp())
 
@@ -97,8 +94,11 @@ class ConvolutionalVAE(nn.Module):
         :return: mu_x, mu_z, log_variance_z
         """
 
+        batch_size = x.size(0)
+
         # Encode the input data x into the mean and log of the variance of the latent code.
         mu_z, log_variance_z = self.encoder(x).chunk(2, dim=1)
+        # z = self.sample(batch_size, mu_z, log_variance_z, x.device)
 
         # log(sigma^2) / 2 = log(sigma), sigma = exp(log(sigma))
         sigma = torch.exp(0.5 * log_variance_z)
@@ -117,6 +117,8 @@ class ConvolutionalVAE(nn.Module):
         Generate samples from the VAE model.
 
         :param num_samples: Number of samples to generate.
+        :param mu_z: Mean of the latent code.
+        :param log_variance: Log of the variance of the latent code.
         :return: Generated samples.
         """
         sigma = torch.exp(0.5 * log_variance)
@@ -142,7 +144,7 @@ def main() -> None:
     batch_size = 100
 
     # Number of passes over the training data.
-    num_epochs = 100
+    num_epochs = 10
 
     # Learning rate for the optimizer.
     learning_rate = 1e-3
