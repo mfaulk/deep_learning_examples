@@ -38,7 +38,7 @@ def vae_loss(
     # KL Divergence
     # Appendix B of Kingma and Welling gives an analytical solution for the KL divergence when
     # 1. The prior is the standard normal distribution, i.e. p_{\theta}(z) = N(z; 0, I)
-    # 2. The approximate posterior distribution q_{\phi}(z|x) is Gaussian.
+    # 2. The approximate posterior distribution q_{\phi}(z|x) is Gaussian with mean mu and diagonal covariance matrix sigma^2
 
     # Sum of KL divergence over all elements of the batch.
     # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
@@ -86,6 +86,40 @@ class ConvolutionalVAE(nn.Module):
             AssertShape((1, 28, 28)),
         )
 
+    def encode(self, x: Tensor) -> Tuple[Tensor, Tensor]:
+        """
+        Encode the input data x into the mean and log of the variance of the latent code.
+
+        :param x: Input tensor of shape (batch_size, input_size)
+        :return: mu_z, log_variance_z
+        """
+        mu_z, log_variance_z = self.encoder(x).chunk(2, dim=1)
+        return mu_z, log_variance_z
+
+    def sample_z(self, mu_z: Tensor, log_variance_z: Tensor) -> Tensor:
+        """
+        Sample the latent code z from the mean and log of the variance of the latent code.
+
+        :param mu_z: Mean of the latent code.
+        :param log_variance_z: Log of the variance of the latent code.
+        :return: Sampled latent code z.
+        """
+        # sigma = exp(log(sigma)), and log(sigma) = log(sigma^2) / 2
+        sigma = torch.exp(0.5 * log_variance_z)
+        epsilon = torch.randn_like(sigma)
+        z = mu_z + epsilon * sigma
+        return z
+
+    def decode(self, z: Tensor) -> Tensor:
+        """
+        Decode the latent code z into the mean of the output data.
+
+        :param z: Latent code tensor of shape (batch_size, code_size)
+        :return: mu_x
+        """
+        mu_x: Tensor = self.decoder(z)
+        return mu_x
+
     def forward(self, x: Tensor) -> Tuple[Tensor, Tensor, Tensor]:
         """
         Forward pass of the VAE model.
@@ -94,38 +128,23 @@ class ConvolutionalVAE(nn.Module):
         :return: mu_x, mu_z, log_variance_z
         """
 
-        batch_size = x.size(0)
-
-        # Encode the input data x into the mean and log of the variance of the latent code.
-        mu_z, log_variance_z = self.encoder(x).chunk(2, dim=1)
-        # z = self.sample(batch_size, mu_z, log_variance_z, x.device)
-
-        # log(sigma^2) / 2 = log(sigma), sigma = exp(log(sigma))
-        sigma = torch.exp(0.5 * log_variance_z)
-        epsilon = torch.randn_like(sigma)
-
-        # z|x ~ N(mu, sigma^2)
-        z = mu_z + epsilon * sigma
-
-        # Decode the latent code z into the mean of the output data.
-        mu_x = self.decoder(z)
-
+        mu_z, log_variance_z = self.encode(x)
+        z = self.sample_z(mu_z, log_variance_z)
+        mu_x = self.decode(z)
         return mu_x, mu_z, log_variance_z
 
-    def sample(self, num_samples: int, mu_z: Tensor, log_variance: Tensor, device) -> Tensor:
+    def generate(self, num_samples: int, device) -> Tensor:
         """
-        Generate samples from the VAE model.
+        Generate new samples from the VAE model.
 
         :param num_samples: Number of samples to generate.
-        :param mu_z: Mean of the latent code.
-        :param log_variance: Log of the variance of the latent code.
+        :param device: Device to use.
         :return: Generated samples.
         """
-        sigma = torch.exp(0.5 * log_variance)
-        epsilon = torch.randn_like(sigma)
 
-        # z|x ~ N(mu, sigma^2)
-        z = mu_z + epsilon * sigma
+        # Sample noise from a standard normal distribution.
+        z = torch.randn(num_samples, self.code_size).to(device)
+        # Convert z to a tensor of shape (num_samples, code_size, 1, 1)
         z = z.view(-1, self.code_size, 1, 1)
         samples: Tensor = self.decoder(z)
         return samples
@@ -144,22 +163,18 @@ def main() -> None:
     batch_size = 100
 
     # Number of passes over the training data.
-    num_epochs = 10
+    num_epochs = 200
 
     # Learning rate for the optimizer.
     learning_rate = 1e-3
 
+    latent_code_size = 20
+
     # === Data ===
-    transform = transforms.Compose(
-        [
-            transforms.ToTensor(), # Converts pixel values in the range [0, 255] to [0, 1].
-            torch.flatten,
-        ]
-    )
-    transform = transforms.Compose([transforms.ToTensor()]) # Converts pixel values in the range [0, 255] to [0, 1].
+    transform = transforms.Compose([transforms.ToTensor()])  # Converts pixel values in the range [0, 255] to [0, 1].
     train_loader, test_loader = mnist(data_path, batch_size, transform)
 
-    vae = ConvolutionalVAE(12).to(device)
+    vae = ConvolutionalVAE(latent_code_size).to(device)
     summary(vae, input_size=(batch_size, 1, 28, 28))
 
     # === Training ===
@@ -176,12 +191,12 @@ def main() -> None:
 
             # Forward pass
             outputs, mu, sigma = vae(images)
-            loss = vae_loss(images, outputs, mu, sigma)
-            epoch_loss += loss.item() * batch_size
+            batch_loss = vae_loss(images, outputs, mu, sigma)
+            epoch_loss += batch_loss.item()
 
             # Backward pass and parameter updates
             optimizer.zero_grad()
-            loss.backward()
+            batch_loss.backward()
             optimizer.step()
 
         avg_train_loss = epoch_loss / float(len(train_loader.dataset))
@@ -196,6 +211,10 @@ def main() -> None:
     test_images = test_images.cuda()
 
     (reconstructed, mu_z, log_variance_z) = vae.forward(test_images)
+    # print(f"Reconstructed shape: {reconstructed.shape}")
+    # print(f"mu_z shape: {mu_z.shape}")
+    # print(f"log_variance_z shape: {log_variance_z.shape}")
+
     test_images = test_images.cpu()
     reconstructed = reconstructed.cpu()
 
@@ -204,7 +223,8 @@ def main() -> None:
 
     # === Generate samples ===
     num_samples = 100
-    samples = vae.sample(num_samples, mu_z, log_variance_z, device).cpu().detach()
+    vae.to(device)
+    samples = vae.generate(num_samples, device).cpu().detach()
     samples = samples.view(num_samples, 28, 28)
 
     num_row = 10
